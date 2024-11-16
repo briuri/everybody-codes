@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="com.microsoft.z3-4.12.4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/com.microsoft.z3-4.12.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.13.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.13.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.13.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/junit-platform-console-standalone-1.9.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
