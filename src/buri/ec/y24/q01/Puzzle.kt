@@ -42,7 +42,7 @@ class Puzzle : BasePuzzle() {
     }
 
     /**
-     * Executes a part of the puzzle using the specified input file.
+     * Executes a part of the puzzle using the specified input.
      */
     override fun run(part: Part, input: String): Number {
         val battles = input.chunked(part.number)
