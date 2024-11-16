@@ -1,7 +1,6 @@
 package buri.ec.common
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.File
@@ -16,17 +15,23 @@ abstract class BasePuzzle {
     /**
      * Abstract function for running a part of a puzzle
      */
-    abstract fun run(part: Part, input: String): Any
+    abstract fun run(part: Part, input: List<String>): Any
 
     /**
      * Runs part of a puzzle and compares the result to the expected value.
      */
-    fun assertRun(expected: Any, input: String, toConsole: Boolean = false) {
+    fun assertRun(expected: Any, isExample: Boolean, toConsole: Boolean = false) {
+        val year = getYear()
+        val quest = getQuest()
         val part = when (getPart()) {
             "1" -> Part.ONE
             "2" -> Part.TWO
             else -> Part.THREE
         }
+
+        val fileSuffix = if (isExample) "-ex" else ""
+        val path = "data/y${year}/everybody_codes_e20${year}_q${quest}_p${part.number}$fileSuffix.txt"
+        val input = File(path).readLines()
 
         val actual = this.run(part, input)
         if (toConsole) {

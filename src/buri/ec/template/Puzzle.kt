@@ -11,40 +11,28 @@ import org.junit.Test
  */
 class Puzzle : BasePuzzle() {
 
-    private val input1 = """
-        
-    """.trimIndent()
-
-    private val input2 = """
-        
-    """.trimIndent()
-
-    private val input3 = """
-      
-    """.trimIndent()
-
     @Test
     fun runPart1() {
-        assertRun(0, "example1")
-        assertRun(0, input1, true)
+        assertRun(0, true)
+        assertRun(0, false, true)
     }
 
     @Test
     fun runPart2() {
-        assertRun(0, "example2")
-        assertRun(0, input2, true)
+        assertRun(0, true)
+        assertRun(0, false, true)
     }
 
     @Test
     fun runPart3() {
-        assertRun(0, "example3")
-        assertRun(0, input3, true)
+        assertRun(0, true)
+        assertRun(0, false, true)
     }
 
     /**
      * Executes a part of the puzzle using the specified input.
      */
-    override fun run(part: Part, input: String): Number {
+    override fun run(part: Part, input: List<String>): Number {
         return -1
     }
 }
