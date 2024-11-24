@@ -39,7 +39,7 @@ class Puzzle : BasePuzzle() {
 
         var level = 1
         while (true) {
-            val validDigs = grid.filter { it == level }.filter { grid.canDig(it, part == Part.THREE) }
+            val validDigs = grid.filter { it == level }.filter { grid.canDig(it, part.isThree()) }
             if (validDigs.isEmpty()) {
                 break
             }

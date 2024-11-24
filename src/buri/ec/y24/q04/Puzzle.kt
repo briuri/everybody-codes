@@ -34,7 +34,7 @@ class Puzzle : BasePuzzle() {
      */
     override fun run(part: Part, input: List<String>): Number {
         val heights = input.map { it.toInt() }
-        if (part != Part.THREE) {
+        if (!part.isThree()) {
             return heights.sumOf { it - heights.min() }
         }
         val median = heights.sorted()[heights.size / 2]
