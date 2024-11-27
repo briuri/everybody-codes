@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.File
+import java.util.*
 
 /**
  * Base class with shared functionality for all puzzles
@@ -90,6 +91,22 @@ abstract class BasePuzzle {
         }
         return testName.substring(testName.indexOf("Part") + 4)
     }
+}
+
+/**
+ * Generates every permutation for a list of objects.
+ */
+fun <T> generatePermutations(input: List<T>, index: Int = 0): MutableSet<String> {
+    val permutations = mutableSetOf<String>()
+    if (index == input.lastIndex) {
+        permutations.add(input.toList().joinToString(","))
+    }
+    for (i in index..input.lastIndex) {
+        Collections.swap(input, index, i)
+        permutations.addAll(generatePermutations(input, index + 1))
+        Collections.swap(input, i, index)
+    }
+    return permutations
 }
 
 /**
