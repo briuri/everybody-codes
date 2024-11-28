@@ -59,7 +59,7 @@ class Puzzle : BasePuzzle() {
 
             var layer = 1
             var currentThickness = 1L
-            var bottomWidth = 1L
+            var bottomWidth = 1
 
             while (true) {
                 if (part.isTwo()) {
@@ -73,7 +73,7 @@ class Puzzle : BasePuzzle() {
                         if (i == 0 || i == columnHeights.lastIndex) {
                             totalBlocksUsed += columnHeights[i]
                         } else {
-                            val emptySpace = (numPriests * bottomWidth * columnHeights[i]) % numAcolytes
+                            val emptySpace = (numPriests * columnHeights[i] * bottomWidth) % numAcolytes
                             totalBlocksUsed += columnHeights[i] - emptySpace
                         }
                     }
@@ -86,7 +86,7 @@ class Puzzle : BasePuzzle() {
                 if (part.isThree()) {
                     currentThickness += numAcolytes
                 }
-                bottomWidth = (2 * layer - 1).toLong()
+                bottomWidth = 2 * layer - 1
                 blocksPerLayer[layer] = currentThickness * bottomWidth
                 for (i in columnHeights.indices) {
                     columnHeights[i] = columnHeights[i] + currentThickness
