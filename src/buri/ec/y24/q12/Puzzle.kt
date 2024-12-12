@@ -44,21 +44,21 @@ class Puzzle : BasePuzzle() {
         var rankingValue = 0
         for (target in grid.filter { it in listOf('T', 'H') }) {
             val hardScore = if (grid[target] == 'H') 2 else 1
-            val tries = mutableSetOf<Pair<Int, Int>>()
+            val tries = mutableSetOf<Pair<Int, Int>?>()
             tries.add(grid.findPower(a, target, groundY))
             tries.add(grid.findPower(b, target, groundY))
             tries.add(grid.findPower(c, target, groundY))
-            val (segment, power) = tries.first { it.second != -1 }
+            val (segment, power) = tries.filterNotNull().first()
             rankingValue += segment * power * hardScore
         }
         return rankingValue
     }
 
     /**
-     * Returns the lowest possible power that can strike the target from the starting point. Returns MAX
+     * Returns the lowest possible power that can strike the target from the starting point. Returns null
      * if the catapult cannot strike at all.
      */
-    private fun Grid<Char>.findPower(start: Point2D<Int>, target: Point2D<Int>, groundY: Int): Pair<Int, Int> {
+    private fun Grid<Char>.findPower(start: Point2D<Int>, target: Point2D<Int>, groundY: Int): Pair<Int, Int>? {
         val segment = when (this[start]) {
             'A' -> 1
             'B' -> 2
@@ -87,6 +87,6 @@ class Puzzle : BasePuzzle() {
                 return Pair(segment, power)
             }
         }
-        return Pair(segment, -1)
+        return null
     }
 }
