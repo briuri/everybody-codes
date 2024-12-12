@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.File
+import java.io.FileNotFoundException
 import java.util.*
 
 /**
@@ -31,8 +32,12 @@ abstract class BasePuzzle {
         }
 
         val fileSuffix = if (isExample) "-ex" else ""
-        val path = "data/y${year}/everybody_codes_e20${year}_q${quest}_p${part.number}$fileSuffix.txt"
-        val input = File(path).readLines()
+        val filename = "everybody_codes_e20${year}_q${quest}_p${part.number}$fileSuffix.txt"
+        val input = try {
+            File("data/y${year}/$filename").readLines()
+        } catch (e: FileNotFoundException) {
+            File("data/zNew/$filename").readLines()
+        }
 
         val actual = this.run(part, input)
         if (toConsole) {
