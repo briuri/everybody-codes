@@ -53,7 +53,7 @@ class Puzzle : BasePuzzle() {
             grid = Grid.fromCharInput(input.drop(2))
 
             val cycles = if (part.isTwo()) 1 else 1_048_576_000 / cachedSteps
-            repeat (cycles) {
+            repeat(cycles) {
                 grid = apply(cache, grid)
             }
         }
@@ -124,7 +124,7 @@ class Puzzle : BasePuzzle() {
      * Extends the cache ahead some number of cycles.
      */
     private fun MutableList<ArrayDeque<Point2D<Int>>>.grow(destinations: Map<Point2D<Int>, Point2D<Int>>, times: Int) {
-        repeat (times) {
+        repeat(times) {
             val ends = this.map { it.last() }
             val cacheMap = this.getDeques(ends)
             for (end in ends) {

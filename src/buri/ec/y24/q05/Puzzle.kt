@@ -59,8 +59,7 @@ class Puzzle : BasePuzzle() {
             if (part.isThree()) {
                 if (state in states) {
                     return shouts.keys.max()
-                }
-                else {
+                } else {
                     states.add(state)
                 }
             }

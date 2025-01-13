@@ -57,16 +57,19 @@ class Puzzle : BasePuzzle() {
     /**
      * Recursively visits down the tree until it reaches a fruit.
      */
-    private fun MutableMap<String, List<String>>.visit(finishedPaths: MutableSet<String>, pathSoFar: String, children: List<String>) {
+    private fun MutableMap<String, List<String>>.visit(
+        finishedPaths: MutableSet<String>,
+        pathSoFar: String,
+        children: List<String>
+    ) {
         for (child in children) {
             if (child in listOf("BUG", "ANT")) {
                 continue
             }
             if (child == "@" || this[child] == null) {
                 finishedPaths.add("$pathSoFar$child")
-            }
-            else {
-                this.visit(finishedPaths,"$pathSoFar$child-", this[child]!!)
+            } else {
+                this.visit(finishedPaths, "$pathSoFar$child-", this[child]!!)
             }
         }
     }

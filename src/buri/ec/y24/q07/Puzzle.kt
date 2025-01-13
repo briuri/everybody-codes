@@ -2,7 +2,6 @@ package buri.ec.y24.q07
 
 import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
-import buri.ec.common.generatePermutations
 import org.junit.Test
 
 /**

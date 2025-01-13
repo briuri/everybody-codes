@@ -54,7 +54,7 @@ class Puzzle : BasePuzzle() {
             }
         }
 
-        val sizes = starBags.filter { it.isNotEmpty()}.map { getSize(it) }.sortedDescending()
+        val sizes = starBags.filter { it.isNotEmpty() }.map { getSize(it) }.sortedDescending()
         var product = 1L
         for (size in sizes.subList(0, 3)) {
             product *= size

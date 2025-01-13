@@ -1,6 +1,9 @@
 package buri.ec.y24.q15
 
-import buri.ec.common.*
+import buri.ec.common.BasePuzzle
+import buri.ec.common.Part
+import buri.ec.common.Pathfinder
+import buri.ec.common.countSteps
 import buri.ec.common.position.Grid
 import buri.ec.common.position.Point2D
 import org.junit.Test
@@ -56,8 +59,7 @@ class Puzzle : BasePuzzle() {
         val frontier = mutableListOf<State>()
         if (part.isOne()) {
             frontier.add(State(exit, listOf("H", "."), 0))
-        }
-        else if (part.isTwo()) {
+        } else if (part.isTwo()) {
             if (input.size < 20) {
                 frontier.add(State(exit, listOf("A", "B", "C", "."), 0))
                 frontier.add(State(exit, listOf("A", "C", "B", "."), 0))
@@ -68,8 +70,7 @@ class Puzzle : BasePuzzle() {
                 frontier.add(State(exit, listOf("A", "C", "D", "E", "B", "."), 0))
                 frontier.add(State(exit, listOf("A", "C", "E", "D", "B", "."), 0))
             }
-        }
-        else {
+        } else {
             // Left half of the map in part 3 is 466 starting at 85,75
             // Right half of the map in part 3 is 432 starting at 169,75
             val steps = 466 + 432
