@@ -32,9 +32,9 @@ abstract class BasePuzzle {
         }
 
         val fileSuffix = if (isExample) "-ex" else ""
-        val filename = "everybody_codes_e20${year}_q${quest}_p${part.number}$fileSuffix.txt"
+        val filename = "everybody_codes_e${year}_q${quest}_p${part.number}$fileSuffix.txt"
         val input = try {
-            File("data/y${year}/$filename").readLines()
+            File("data/${year}/$filename").readLines()
         } catch (e: FileNotFoundException) {
             File("data/zNew/$filename").readLines()
         }
@@ -57,7 +57,7 @@ abstract class BasePuzzle {
         val year = getYear()
         val quest = getQuest()
         val part = getPart()
-        println("### 20$year Quest $quest Part $part ###")
+        println("### $year Quest $quest Part $part ###")
         println(value)
 
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
@@ -69,7 +69,7 @@ abstract class BasePuzzle {
      */
     private fun getYear(): String {
         with(this.javaClass) {
-            return name.substring(name.indexOf(".y") + 2, name.indexOf(".q"))
+            return name.substring(name.indexOf("ec.e") + 4, name.indexOf(".q"))
         }
     }
 
