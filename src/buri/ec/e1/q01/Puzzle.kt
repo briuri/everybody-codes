@@ -2,11 +2,9 @@ package buri.ec.e1.q01
 
 import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
-import buri.ec.common.extractInts
 import buri.ec.common.extractLongs
 import org.junit.Test
 import java.math.BigInteger
-import kotlin.math.pow
 
 /**
  * Entry point for a daily puzzle
@@ -29,8 +27,8 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart3() {
-        assertRun(0, true)
-        assertRun(0, false, true)
+        assertRun(3279640, true)
+        assertRun(667544464902526, false, true)
     }
 
     /**
@@ -49,20 +47,46 @@ class Puzzle : BasePuzzle() {
         return max
     }
 
-    private fun eni(part: Part, n: Long, exp: Long, mod: Long): Long {
-        var remainders = mutableListOf<Long>()
+    private fun eni(part: Part, rawN: Long, exp: Long, rawMod: Long): Long {
+        val n = BigInteger.valueOf(rawN)
+        val mod = BigInteger.valueOf(rawMod)
+        val remainders = mutableListOf<Long>()
         if (part.isOne()) {
             var score = 1L
             repeat(exp.toInt()) {
-                score = score * n % mod
+                score = score * rawN % rawMod
                 remainders.add(0, score)
             }
-        } else {
+        } else if (part.isTwo()) {
             for (i in 0..4) {
                 val expStep = BigInteger.valueOf(exp - i)
-                val result = BigInteger.valueOf(n).modPow(expStep, BigInteger.valueOf(mod))
+                val result = n.modPow(expStep, mod)
                 remainders.add(result.toLong())
             }
+        } else {
+            val cycle = mutableListOf<BigInteger>()
+            var i = 0
+            while (true) {
+                val result = n.modPow(BigInteger.valueOf(exp - i), mod)
+                if (result !in cycle) {
+                    cycle.add(result)
+                } else {
+                    break
+                }
+                i++
+            }
+
+            var leftoverStart = exp % cycle.size
+            while (n.modPow(BigInteger.valueOf(leftoverStart), mod) != cycle[0]) {
+                leftoverStart += cycle.size
+            }
+            var leftover = 0L
+            for (j in 1L..leftoverStart.toInt()) {
+                leftover += n.modPow(BigInteger.valueOf(j), mod).toLong()
+            }
+            val numCycles = (exp - leftoverStart) / cycle.size
+            val total = cycle.sumOf { it.toLong() } * numCycles + leftover
+            return total
         }
         return remainders.joinToString("").toLong()
     }
