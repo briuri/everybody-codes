@@ -46,7 +46,7 @@ class Puzzle : BasePuzzle() {
 
         val widestLeft = left.getNodesAtWidestDepth()
         val widestRight = right.getNodesAtWidestDepth()
-        return widestLeft.map { it.symbol }.joinToString("") + widestRight.joinToString("") { it.symbol }
+        return widestLeft.joinToString("") { it.symbol } + widestRight.joinToString("") { it.symbol }
     }
 }
 
