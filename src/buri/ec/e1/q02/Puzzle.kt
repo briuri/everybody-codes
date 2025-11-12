@@ -26,84 +26,106 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart3() {
-        assertRun("DJMGL", true)
-        assertRun("", false, true)
+        assertRun("DJCGL", true)
+        assertRun("QUACK!YBNMTWPVZLLTHPTZLTWSHXSXBLSG", false, true)
     }
 
     /**
      * Executes a part of the puzzle using the specified input.
      */
     override fun run(part: Part, input: List<String>): String {
-        val leftTree = Tree()
-        val rightTree = Tree()
-
-        // ADD id=1 left=[10,A] right=[30,H]
+        val trees = Trees()
         for (line in input) {
+            // SWAP 1
             if (line.startsWith("SWAP")) {
                 val id = line.extractInts()[0]
-                swap(part, leftTree, rightTree, id)
-            } else {
+                trees.swap(part, id)
+            }
+            // ADD id=1 left=[10,A] right=[30,H]
+            else {
                 val tokens = line.split(" ")
                 val id = tokens[1].split("=")[1].toInt()
                 val rawLeft = tokens[2].split("=")[1].drop(1).dropLast(1).split(",")
                 val rawRight = tokens[3].split("=")[1].drop(1).dropLast(1).split(",")
                 val leftNode = Node(id, rawLeft[0].toInt(), rawLeft[1])
                 val rightNode = Node(id, rawRight[0].toInt(), rawRight[1])
-                leftTree.add(leftNode)
-                rightTree.add(rightNode)
+                trees.add(leftNode, rightNode)
             }
         }
-        return leftTree.getLettersAtWidestDepth() + rightTree.getLettersAtWidestDepth()
-    }
-
-    fun swap(part: Part, leftTree: Tree, rightTree: Tree, id: Int) {
-        val leftNode = leftTree.getNode(id)
-        val rightNode = rightTree.getNode(id)
-        val leftNodeCopy = leftNode.copy()
-        leftTree.replaceNode(part, leftNode, rightNode)
-        rightTree.replaceNode(part,rightNode, leftNodeCopy)
+        return trees.getLettersAtWidestDepth()
     }
 }
 
-class Tree() {
-    var root: Node? = null
-    val nodes = mutableMapOf<Int, Node>()
-
-    fun add(node: Node) {
-        if (root == null) {
-            root = node
-        } else {
-            root!!.add(node)
-        }
-        nodes[node.id] = node
-    }
-
-    fun getNode(id: Int): Node {
-        return nodes[id]!!
-    }
-
-    fun replaceNode(part: Part, oldNode: Node, newNode: Node) {
-        if (part.isTwo()) {
-            oldNode.rank = newNode.rank
-            oldNode.symbol = newNode.symbol
-        }
-        else {
-
-        }
-    }
+class Trees() {
+    var leftTree: Node? = null
+    var rightTree: Node? = null
 
     fun getLettersAtWidestDepth(): String {
-        val depthMap = mutableMapOf<Int, Int>()
-        for (node in nodes.values) {
-            depthMap.putIfAbsent(node.depth, 0)
-            depthMap[node.depth] = depthMap[node.depth]!! + 1
-        }
-        val mostAtDepth = depthMap.values.max()
-        val widestDepth = depthMap.filterValues { it == mostAtDepth }.keys.first()
+        return leftTree!!.getLettersAtWidestDepth() + rightTree!!.getLettersAtWidestDepth()
+    }
 
-        val builder = StringBuilder()
-        root!!.getLettersAtDepth(builder, widestDepth)
-        return builder.toString()
+    private fun getNodes(id: Int): MutableList<Node> {
+        val nodes = mutableListOf<Node>()
+        nodes.addAll(leftTree!!.getAllNodes().filter { it.id == id })
+        nodes.addAll(rightTree!!.getAllNodes().filter { it.id == id })
+        return nodes
+    }
+
+    fun add(leftNode: Node, rightNode: Node) {
+        // Root nodes
+        if (leftTree == null) {
+            leftTree = leftNode
+            rightTree = rightNode
+        }
+        // All future nodes
+        else {
+            leftTree!!.add(leftNode)
+            rightTree!!.add(rightNode)
+        }
+    }
+
+    fun swap(part: Part, id: Int) {
+        // In part 3, first and second node may both be in left or right tree.
+        val nodes = getNodes(id)
+        val firstNode = nodes[0]
+        val secondNode = nodes[1]
+        val firstNodeCopy = firstNode.copy()
+        // Part Two: Just swap values.
+        if (part.isTwo()) {
+            firstNode.rank = secondNode.rank
+            firstNode.symbol = secondNode.symbol
+            secondNode.rank = firstNodeCopy.rank
+            secondNode.symbol = firstNodeCopy.symbol
+        }
+        // Part Three: Swap entire subtrees.
+        else {
+            val oldLeftParent = firstNode.parent
+            val oldRightParent = secondNode.parent
+
+            // Move first into second's place.
+            firstNode.swapParent(oldRightParent)
+            if (oldRightParent != null) {
+                if (oldRightParent.left == secondNode) {
+                    oldRightParent.left = firstNode
+                } else {
+                    oldRightParent.right = firstNode
+                }
+            } else {
+                rightTree = firstNode
+            }
+
+            // Move second into first's place.
+            secondNode.swapParent(oldLeftParent)
+            if (oldLeftParent != null) {
+                if (oldLeftParent.left == firstNode) {
+                    oldLeftParent.left = secondNode
+                } else {
+                    oldLeftParent.right = secondNode
+                }
+            } else {
+                leftTree = secondNode
+            }
+        }
     }
 }
 
@@ -113,8 +135,24 @@ data class Node(val id: Int, var rank: Int, var symbol: String) {
     var right: Node? = null
     var depth = 0
 
-    override fun toString(): String {
-        return ("$id[$rank $symbol p=${parent?.symbol}, l=${left?.symbol}, r=${right?.symbol}]")
+    fun getAllNodes(): MutableList<Node> {
+        val nodes = mutableListOf<Node>()
+        addSubTreeTo(nodes)
+        return nodes
+    }
+
+    fun getLettersAtWidestDepth(): String {
+        val depthMap = mutableMapOf<Int, Int>()
+        for (node in getAllNodes()) {
+            depthMap.putIfAbsent(node.depth, 0)
+            depthMap[node.depth] = depthMap[node.depth]!! + 1
+        }
+        val mostAtDepth = depthMap.values.max()
+        val widestDepth = depthMap.filterValues { it == mostAtDepth }.keys.first()
+
+        val builder = StringBuilder()
+        getLettersAtDepth(builder, widestDepth)
+        return builder.toString()
     }
 
     fun add(node: Node) {
@@ -137,13 +175,31 @@ data class Node(val id: Int, var rank: Int, var symbol: String) {
         }
     }
 
-    fun getLettersAtDepth(builder: StringBuilder, depth: Int) {
+    private fun getLettersAtDepth(builder: StringBuilder, depth: Int) {
         if (this.depth == depth) {
             builder.append(this.symbol)
-        }
-        else {
+        } else {
             left?.getLettersAtDepth(builder, depth)
             right?.getLettersAtDepth(builder, depth)
         }
+    }
+
+    fun swapParent(newParent: Node?) {
+        if (newParent != null) {
+            this.parent = newParent
+            updateSubTreeDepth(newParent.depth + 1)
+        }
+    }
+
+    private fun addSubTreeTo(nodes: MutableList<Node>) {
+        nodes.add(this)
+        left?.addSubTreeTo(nodes)
+        right?.addSubTreeTo(nodes)
+    }
+
+    private fun updateSubTreeDepth(newDepth: Int) {
+        this.depth = newDepth
+        left?.updateSubTreeDepth(newDepth + 1)
+        right?.updateSubTreeDepth(newDepth + 1)
     }
 }
