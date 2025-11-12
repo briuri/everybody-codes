@@ -41,7 +41,7 @@ class Puzzle : BasePuzzle() {
         }
         if (part.isOne()) {
             val positions = snails.map { it.getPositionOnDay(100) }
-            return positions.map { it.x + (100 * it.y) }.sum()
+            return positions.sumOf { it.x + (100 * it.y) }
         }
 
         var increment = 1L
@@ -73,7 +73,7 @@ data class Snail(val x: Int, val y: Int) {
     fun getPositionOnDay(day: Long): Point2D<Int> {
         var movingX = x
         var movingY = y
-        for (i in 0..day % length - 1) {
+        repeat((day % length).toInt()) {
             if (movingY == 1) {
                 val temp = movingY
                 movingY = movingX
