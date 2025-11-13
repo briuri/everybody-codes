@@ -3,6 +3,8 @@ package buri.ec.e2.q03
 import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
 import buri.ec.common.extractInts
+import buri.ec.common.position.Grid
+import buri.ec.common.position.Point2D
 import org.junit.Test
 
 /**
@@ -26,8 +28,8 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart3() {
-        assertRun(0, true)
-        assertRun(0, false, true)
+        assertRun("33", true)
+        assertRun("154547", false, true)
     }
 
     /**
@@ -40,12 +42,6 @@ class Puzzle : BasePuzzle() {
         } else {
             input.subList(0, diceSeparator)
         }
-        val racetrack = if (diceSeparator == -1) {
-            emptyList()
-        } else {
-            input.last().toCharArray().toList().map { it.digitToInt() }
-        }
-
         val dice = mutableMapOf<Int, Die>()
         // 1: faces=[1,2,3,4,5,6] seed=7
         for (line in diceInput) {
@@ -63,30 +59,59 @@ class Puzzle : BasePuzzle() {
             return dice.values.first().rollCount.toString()
         }
 
-        // Simulate a race
-        val simluationLength = 12_000
-        val races = mutableMapOf<Int, MutableList<Int>>()
-        for (id in dice.keys) {
-            races[id] = mutableListOf<Int>()
-            repeat(simluationLength) {
-                races[id]!!.add(dice[id]!!.roll())
-            }
-        }
-
-        // Figure out order.
-        val finishesAt = mutableMapOf<Int, Int>()
-        for (key in races.keys) {
-            val race = races[key]!!
-            var progress = racetrack
-            while (progress.isNotEmpty()) {
-                val next = race.removeFirst()
-                if (progress.first() == next) {
-                    progress = progress.drop(1)
+        if (part.isTwo()) {
+            // Simulate a race
+            val simluationLength = 12_000
+            val paths = mutableMapOf<Int, MutableList<Int>>()
+            for (id in dice.keys) {
+                paths[id] = mutableListOf()
+                repeat(simluationLength) {
+                    paths[id]!!.add(dice[id]!!.roll())
                 }
             }
-            finishesAt[key] = simluationLength - race.size
+            val racetrack = input.last().toCharArray().toList().map { it.digitToInt() }
+            // Figure out order.
+            val finishesAt = mutableMapOf<Int, Int>()
+            for (key in paths.keys) {
+                val path = paths[key]!!
+                var remaining = racetrack
+                while (remaining.isNotEmpty()) {
+                    val next = path.removeFirst()
+                    if (remaining.first() == next) {
+                        remaining = remaining.drop(1)
+                    }
+                }
+                finishesAt[key] = simluationLength - path.size
+            }
+            return finishesAt.toList().sortedBy { it.second }.map { it.first }.joinToString(",")
         }
-        return finishesAt.toList().sortedBy { it.second }.map { it.first }.joinToString(",")
+
+        // Part Three
+        val grid = Grid.fromIntInput(input.subList(diceSeparator + 1, input.size))
+        val coinGrid = Grid(grid.width, grid.height, 0)
+        val starts = mutableSetOf<Point2D<Int>>()
+        for (y in 0 until grid.height) {
+            for (x in 0 until grid.width) {
+                starts.add(Point2D(x, y))
+            }
+        }
+        for (die in dice.values) {
+            var frontier = starts
+            while (frontier.isNotEmpty()) {
+                val nexts = mutableSetOf<Point2D<Int>>()
+                val roll = die.roll()
+                for (position in frontier) {
+                    if (grid[position] != roll) {
+                        continue
+                    }
+                    coinGrid[position] = 1
+                    nexts.add(position)
+                    nexts.addAll(grid.getNeighbors(position))
+                }
+                frontier = nexts
+            }
+        }
+        return coinGrid.sum().toString()
     }
 }
 
