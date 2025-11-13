@@ -14,19 +14,19 @@ class Puzzle : BasePuzzle() {
     @Test
     fun runPart1() {
         assertRun(0, true)
-        assertRun(0, false, true)
+        assertRun(0, isExample = false, toConsole = true)
     }
 
     @Test
     fun runPart2() {
         assertRun(0, true)
-        assertRun(0, false, true)
+        assertRun(0, isExample = false, toConsole = true)
     }
 
     @Test
     fun runPart3() {
         assertRun(0, true)
-        assertRun(0, false, true)
+        assertRun(0, isExample = false, toConsole = true)
     }
 
     /**
