@@ -1,0 +1,28 @@
+Ulmarcyth,Ildnixis,Jalagrath,Elvaragrath,Ildalar,Palthcyth,Ildfarin,Ardennixis,Ildlyr,Ulmaragrath,Xyrnixis,Jalzris,Ulmaralar,Ardennixis,Ulknixis,Ulmarnixis,Ulmarlyr,Elvarnixis,Krynnlyr,Jalzris,Jalalar,Xyrzris,Jalnixis,Xyrath,Krynnzris,Ulmarcalyx,Palthlyr,Xyragrath,Ardenfarin,Elvarzris,Palthnixis,Palthalar,Elvarcalyx,Krynnnixis,Xyrnixis,Jalnixis,Ulmarath,Krynncyth,Ildcyth,Krynnalar,Ardencyth,Elvarfarin,Ulkagrath,Ulkfarin,Jalnixis,Palthfarin,Xyralar,Ardencalyx,Ulkcalyx,Ildzris,Ardenath,Jallyr,Ulkath,Jalcalyx,Ulknixis,Palthnixis,Xyrlyr,Ardenzris,Ildath,Ulmarnixis,Palthzris,Jalcalyx,Jallyr,Ulmarfarin,Ulkzris,Elvaralar,Ulmarzris,Ardenagrath,Elvarnixis,Ulkcyth,Ulkalar,Xyrfarin,Krynnagrath,Xyrcalyx,Palthagrath,Palthcalyx,Krynnath,Ildcalyx,Elvarlyr,Xyrcyth,Ulklyr,Krynnfarin,Palthath,Ardenalar,Jalfarin,Jalcyth,Krynncalyx,Elvarcyth,Ardenlyr,Jalath,Ildnixis,Jalcyth,Jalnixis,Ildagrath,Elvarath,Jalagrath,Jalfarin,Jalath,Jalalar,Krynnnixis
+
+U > l
+i > n,x,s
+v > a
+A > r
+a > r,g,t,l,v
+c > a,y
+X > y
+K > r
+z > r
+I > l
+f > a
+P > a
+k > a,c,n,z,l,f
+E > l
+n > i,n,a,c,z,l,f
+r > i,a,c,n,z,l,f,v
+y > v,x,r,t,n
+h > a,c,n,z,l,f
+g > r
+l > d,y,a,t,v,c,n,z,l,f
+d > f,e,a,c,n,z,l
+t > h
+J > a
+x > i
+m > a
+e > n

@@ -1,0 +1,15 @@
+Valjorath,Valardith,Azmir,Vanmir,Valmir,Azjorath,Azardith,Vanjorath,Vanardith
+
+A > z
+t > h
+d > i
+l > j,m,a
+o > r
+j > o
+i > t,r
+m > i
+r > d,a
+V > a
+z > a,b
+n > j,m,a
+a > r,b,t
