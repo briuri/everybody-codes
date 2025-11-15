@@ -16,20 +16,20 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart1() {
-        assertRun("26", true)
-        assertRun("42", false, true)
+        assertRun("26", 1)
+        assertRun("42", 0, true)
     }
 
     @Test
     fun runPart2() {
-        assertRun("115", true)
-        assertRun("1115", false, true)
+        assertRun("115", 1)
+        assertRun("1115", 0, true)
     }
 
     @Test
     fun runPart3() {
-        assertRun("13 43", true)
-        assertRun("46 116", false, true)
+        assertRun("13 43", 1)
+        assertRun("46 116", 0, true)
     }
 
     /**
@@ -54,7 +54,7 @@ class Puzzle : BasePuzzle() {
         val totalSlots = input[0].count { it == '*' }
         for (i in paths.indices) {
             val path = paths[i]
-            results[i] = mutableMapOf<Int, Int>()
+            results[i] = mutableMapOf()
             for (j in 1..totalSlots) {
                 results[i]!![j] = getScore(grid, j, path)
             }
@@ -71,7 +71,6 @@ class Puzzle : BasePuzzle() {
         val numSlots = (1..totalSlots).toList()
         val numTokens = paths.size
         val allCombinations = numSlots.generateCombinations(numTokens)
-        println("Number of combinations: ${allCombinations.size}")
 
         var minScore = Int.MAX_VALUE
         var maxScore = Int.MIN_VALUE

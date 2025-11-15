@@ -14,20 +14,20 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart1() {
-        assertRun(10, true)
-        assertRun(13127, false, true)
+        assertRun(10, 1)
+        assertRun(13127, 0, true)
     }
 
     @Test
     fun runPart2() {
-        assertRun(10, true)
-        assertRun(5233, false, true)
+        assertRun(10, 1)
+        assertRun(5233, 0, true)
     }
 
     @Test
     fun runPart3() {
-        assertRun(10449, true)
-        assertRun(149734, false, true)
+        assertRun(10449, 1)
+        assertRun(149734, 0, true)
     }
 
     private val cache = mutableMapOf<Int, Int>()

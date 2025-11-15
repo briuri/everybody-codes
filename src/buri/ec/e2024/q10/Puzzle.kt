@@ -16,19 +16,19 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart1() {
-        assertRun("PTBVRCZHFLJWGMNS", true)
-        assertRun("ZNDFQKMGSTLJVHXW", false, true)
+        assertRun("PTBVRCZHFLJWGMNS", 1)
+        assertRun("ZNDFQKMGSTLJVHXW", 0, true)
     }
 
     @Test
     fun runPart2() {
-        assertRun("198124", false, true)
+        assertRun("198124", 0, true)
     }
 
     @Test
     fun runPart3() {
-        assertRun("3889", true)
-        assertRun("209778", false, true)
+        assertRun("3889", 1)
+        assertRun("209778", 0, true)
     }
 
     private val letterScores = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ"

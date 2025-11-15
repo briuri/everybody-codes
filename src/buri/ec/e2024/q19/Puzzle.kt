@@ -15,19 +15,19 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart1() {
-        assertRun("WIN", true)
-        assertRun("6948379425631369", false, true)
+        assertRun("WIN", 1)
+        assertRun("6948379425631369", 0, true)
     }
 
     @Test
     fun runPart2() {
-        assertRun("VICTORY", true)
-        assertRun("9345391356337546", false, true)
+        assertRun("VICTORY", 1)
+        assertRun("9345391356337546", 0, true)
     }
 
     @Test
     fun runPart3() {
-        assertRun("6742181787958513", false, true)
+        assertRun("6742181787958513", 0, true)
     }
 
     /**
@@ -57,7 +57,6 @@ class Puzzle : BasePuzzle() {
                 grid = apply(cache, grid)
             }
         }
-        println(grid)
         return grid.getCode()
     }
 

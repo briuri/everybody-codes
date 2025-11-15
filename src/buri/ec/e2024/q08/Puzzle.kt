@@ -15,20 +15,20 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart1() {
-        assertRun(21, true)
-        assertRun(9879560, false, true)
+        assertRun(21, 1)
+        assertRun(9879560, 0, true)
     }
 
     @Test
     fun runPart2() {
-        assertRun(27, true)
-        assertRun(146862375, false, true)
+        assertRun(27, 1)
+        assertRun(146862375, 0, true)
     }
 
     @Test
     fun runPart3() {
-        assertRun(2, true)
-        assertRun(37396, false, true)
+        assertRun(2, 1)
+        assertRun(37396, 0, true)
     }
 
     /**

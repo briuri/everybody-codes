@@ -13,19 +13,19 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart1() {
-        assertRun("BDCA", true)
-        assertRun("GFDKAJIHB", false, true)
+        assertRun("BDCA", 1)
+        assertRun("GFDKAJIHB", 0, true)
     }
 
     @Test
     fun runPart2() {
-        assertRun("DCBA", true)
-        assertRun("CKJBIGDEH", false, true)
+        assertRun("DCBA", 1)
+        assertRun("CKJBIGDEH", 0, true)
     }
 
     @Test
     fun runPart3() {
-        assertRun("6421", false, true)
+        assertRun("6421", 0, true)
     }
 
     /**
@@ -55,7 +55,7 @@ class Puzzle : BasePuzzle() {
                 val move = if (track[trackIndex] != 0) {
                     track[trackIndex]
                 } else {
-                    plan.value[step % plan.value.size]!!
+                    plan.value[step % plan.value.size]
                 }
                 currentStep = (currentStep + move).coerceAtLeast(0)
                 score += currentStep

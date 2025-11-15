@@ -14,20 +14,20 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart1() {
-        assertRun("CFGNLK", true)
-        assertRun("QUACK!NBZTMGVX", false, true)
+        assertRun("CFGNLK", 1)
+        assertRun("QUACK!NBZTMGVX", 0, true)
     }
 
     @Test
     fun runPart2() {
-        assertRun("MGFLNK", true)
-        assertRun("QUACK!MSXJLBRGMMHRGZ", false, true)
+        assertRun("MGFLNK", 1)
+        assertRun("QUACK!MSXJLBRGMMHRGZ", 0, true)
     }
 
     @Test
     fun runPart3() {
-        assertRun("DJCGL", true)
-        assertRun("QUACK!YBNMTWPVZLLTHPTZLTWSHXSXBLSG", false, true)
+        assertRun("DJCGL", 1)
+        assertRun("QUACK!YBNMTWPVZLLTHPTZLTWSHXSXBLSG", 0, true)
     }
 
     /**

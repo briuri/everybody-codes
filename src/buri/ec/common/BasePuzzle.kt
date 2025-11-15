@@ -22,7 +22,7 @@ abstract class BasePuzzle {
     /**
      * Runs part of a puzzle and compares the result to the expected value.
      */
-    fun assertRun(expected: Any, isExample: Boolean, toConsole: Boolean = false) {
+    fun assertRun(expected: Any, fileIndex: Int, toConsole: Boolean = false) {
         val year = getYear()
         val quest = getQuest()
         val part = when (getPart()) {
@@ -31,11 +31,10 @@ abstract class BasePuzzle {
             else -> Part.THREE
         }
 
-        val fileSuffix = if (isExample) "-ex" else ""
-        val filename = "everybody_codes_e${year}_q${quest}_p${part.number}$fileSuffix.txt"
+        val filename = "${quest}-${part.number}-$fileIndex.txt"
         val input = try {
             File("data/${year}/$filename").readLines()
-        } catch (e: FileNotFoundException) {
+        } catch (_: FileNotFoundException) {
             File("data/zNew/$filename").readLines()
         }
 

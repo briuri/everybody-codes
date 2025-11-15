@@ -16,20 +16,20 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart1() {
-        assertRun(13, true)
-        assertRun(180, false, true)
+        assertRun(13, 1)
+        assertRun(180, 0, true)
     }
 
     @Test
     fun runPart2() {
-        assertRun(22, true)
-        assertRun(20490, false, true)
+        assertRun(22, 1)
+        assertRun(20490, 0, true)
     }
 
     @Test
     fun runPart3() {
-        assertRun(13, true)
-        assertRun(745995, false, true)
+        assertRun(13, 1)
+        assertRun(745995, 0, true)
     }
 
     /**
@@ -166,15 +166,15 @@ class Puzzle : BasePuzzle() {
         val path = mutableListOf<Point2D<Int>>()
         var current = start
         path.add(current)
-        for (i in 0..<power) {
+        repeat(power) {
             current = current.copy(x = current.x + 1, y = current.y - 1)
             path.add(current)
         }
-        for (i in 0..<power) {
+        repeat(power) {
             current = current.copy(x = current.x + 1)
             path.add(current)
         }
-        for (i in 0..<power) {
+        repeat(power) {
             current = current.copy(x = current.x + 1, y = current.y + 1)
             path.add(current)
         }
