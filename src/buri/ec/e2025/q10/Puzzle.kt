@@ -37,10 +37,8 @@ class Puzzle : BasePuzzle() {
     override fun run(part: Part, input: List<String>): Number {
         val grid = Grid.fromCharInput(input)
         val start = grid.filter { it == 'D' }.first()
-        val sheeps = grid.filter { it == 'S' }
+        val sheeps = grid.filter { it == 'S' }.toSet()
         val hideouts = grid.filter { it == '#' }
-        var dragonSquares = mutableSetOf<Point2D<Int>>()
-        dragonSquares.add(start)
 
         if (part.isOne()) {
             val rounds = if (input.size < 14) {
@@ -48,70 +46,79 @@ class Puzzle : BasePuzzle() {
             } else {
                 4
             }
+
+            val dragonMoves = mutableSetOf<Point2D<Int>>()
+            dragonMoves.add(start)
             repeat(rounds) {
-                val newDragonSquares = mutableSetOf<Point2D<Int>>()
-                for (square in dragonSquares) {
-                    newDragonSquares.add(square)
-                    newDragonSquares.addAll(getDragonMoves(grid, square))
-                }
-                dragonSquares = newDragonSquares
+                dragonMoves.addAll(grid.getDragonMoves(dragonMoves))
             }
-            return dragonSquares.intersect(sheeps).size
-        } else {
+            return dragonMoves.intersect(sheeps).size
+        } else if (part.isTwo()) {
             val rounds = if (input.size < 14) {
                 3
             } else {
                 20
             }
-            var livingSheep = mutableListOf<Point2D<Int>>()
-            livingSheep.addAll(sheeps)
 
+            var sheepLeft = sheeps.toMutableSet()
             var eatenSheep = 0
+            var dragonMoves = setOf(start)
             repeat(rounds) {
-                var localEatenSheep = 0
-
                 // Dragon's Turn
-                val newDragonSquares = mutableSetOf<Point2D<Int>>()
-                for (square in dragonSquares) {
-                    newDragonSquares.addAll(getDragonMoves(grid, square))
-                }
-                var vulnerableSheep = livingSheep.intersect(newDragonSquares).toMutableList()
+                val nextDragonMoves = grid.getDragonMoves(dragonMoves)
+
+                // Count Sheep
+                var vulnerableSheep = sheepLeft.intersect(nextDragonMoves).toMutableSet()
                 vulnerableSheep.removeIf { it in hideouts }
-                localEatenSheep += vulnerableSheep.size
-                livingSheep.removeAll(vulnerableSheep)
+                eatenSheep += vulnerableSheep.size
+                sheepLeft.removeAll(vulnerableSheep)
 
                 // Sheep's Turn
-                livingSheep = moveSheep(grid, livingSheep)
-                vulnerableSheep = livingSheep.intersect(newDragonSquares).toMutableList()
-                vulnerableSheep.removeIf { it in hideouts }
-                localEatenSheep += vulnerableSheep.size
-                livingSheep.removeAll(vulnerableSheep)
+                sheepLeft = grid.moveAllSheep(sheepLeft)
 
-                dragonSquares = newDragonSquares
-                eatenSheep += localEatenSheep
+                // Count Sheep
+                vulnerableSheep = sheepLeft.intersect(nextDragonMoves).toMutableSet()
+                vulnerableSheep.removeIf { it in hideouts }
+                eatenSheep += vulnerableSheep.size
+                sheepLeft.removeAll(vulnerableSheep)
+
+                dragonMoves = nextDragonMoves
             }
             return eatenSheep
         }
+
+        // Part Three
+        return -1
     }
 
-    fun getDragonMoves(grid: Grid<Char>, current: Point2D<Int>): List<Point2D<Int>> {
-        val list = mutableListOf<Point2D<Int>>()
-        list.add(Point2D(current.x + 1, current.y - 2))
-        list.add(Point2D(current.x + 1, current.y + 2))
-        list.add(Point2D(current.x - 1, current.y - 2))
-        list.add(Point2D(current.x - 1, current.y + 2))
-        list.add(Point2D(current.x - 2, current.y - 1))
-        list.add(Point2D(current.x - 2, current.y + 1))
-        list.add(Point2D(current.x + 2, current.y - 1))
-        list.add(Point2D(current.x + 2, current.y + 1))
-        return list.filter { grid.isInBounds(it) }
+    fun Grid<Char>.getMoveName(current: Point2D<Int>): String {
+        val letter = "ABCDEFGHIJKL"[current.x]
+        val number = current.y + 1
+        return "$letter$number"
     }
 
-    fun moveSheep(grid: Grid<Char>, sheeps: List<Point2D<Int>>): MutableList<Point2D<Int>> {
-        val newSheep = mutableListOf<Point2D<Int>>()
+    fun Grid<Char>.getDragonMoves(currents: Set<Point2D<Int>>): Set<Point2D<Int>> {
+        return currents.map { getDragonMoves(it) }.flatten().toSet()
+    }
+
+    fun Grid<Char>.getDragonMoves(current: Point2D<Int>): Set<Point2D<Int>> {
+        val moves = mutableSetOf<Point2D<Int>>()
+        moves.add(Point2D(current.x + 1, current.y - 2))
+        moves.add(Point2D(current.x + 1, current.y + 2))
+        moves.add(Point2D(current.x - 1, current.y - 2))
+        moves.add(Point2D(current.x - 1, current.y + 2))
+        moves.add(Point2D(current.x - 2, current.y - 1))
+        moves.add(Point2D(current.x - 2, current.y + 1))
+        moves.add(Point2D(current.x + 2, current.y - 1))
+        moves.add(Point2D(current.x + 2, current.y + 1))
+        return moves.filter { isInBounds(it) }.toSet()
+    }
+
+    fun Grid<Char>.moveAllSheep(sheeps: Set<Point2D<Int>>): MutableSet<Point2D<Int>> {
+        val newSheep = mutableSetOf<Point2D<Int>>()
         for (sheep in sheeps) {
             newSheep.add(Point2D(sheep.x, sheep.y + 1))
         }
-        return newSheep.filter { grid.isInBounds(it) }.toMutableList()
+        return newSheep.filter { isInBounds(it) }.toMutableSet()
     }
 }
