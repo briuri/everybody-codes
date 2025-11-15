@@ -27,8 +27,8 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart3() {
-        assertRun(15, true)
-        assertRun(0, isExample = false, toConsole = true)
+        assertRun(8, true)
+        assertRun(2262549661306, isExample = false, toConsole = true)
     }
 
     /**
@@ -74,7 +74,7 @@ class Puzzle : BasePuzzle() {
                 sheepLeft.removeAll(vulnerableSheep)
 
                 // Sheep's Turn
-                sheepLeft = grid.moveAllSheep(sheepLeft)
+                sheepLeft = grid.getSheepMoves(sheepLeft)
 
                 // Count Sheep
                 vulnerableSheep = sheepLeft.intersect(nextDragonMoves).toMutableSet()
@@ -87,14 +87,65 @@ class Puzzle : BasePuzzle() {
             return eatenSheep
         }
 
-        // Part Three
-        return -1
+        val winStates = mutableMapOf<String, Long>()
+        return (getWins(grid, winStates, start, sheeps, false))
     }
 
-    fun Grid<Char>.getMoveName(current: Point2D<Int>): String {
-        val letter = "ABCDEFGHIJKL"[current.x]
-        val number = current.y + 1
-        return "$letter$number"
+    fun getWins(
+        grid: Grid<Char>,
+        winStates: MutableMap<String, Long>,
+        dragon: Point2D<Int>,
+        sheeps: Set<Point2D<Int>>,
+        isDragonTurn: Boolean
+    ): Long {
+        if (sheeps.isEmpty()) {
+            return 1
+        }
+        val stateKey = "$dragon|$sheeps|$isDragonTurn"
+        if (stateKey in winStates) {
+            return winStates[stateKey]!!
+        }
+
+        var count = 0L
+        if (isDragonTurn) {
+            for (move in grid.getDragonMoves(dragon)) {
+                val sheepLeft = sheeps.toMutableSet()
+                sheepLeft.removeIf { it == move && grid[it] != '#' }
+                count += getWins(grid, winStates, move, sheepLeft, false)
+            }
+        } else {
+            var hadMove = false
+            for (sheep in sheeps) {
+                val move = Point2D(sheep.x, sheep.y + 1)
+                if (!grid.isInBounds(move)) {
+                    hadMove = true
+                }
+                if (grid.isInBounds(move) && (grid[move] == '#' || move != dragon)) {
+                    // Post-Solve Optimization: Let sheep slide to safety if hideouts stretch to end.
+                    // 1m18 down to 6s.
+                    if (!grid.isSafeForever(move)) {
+                        val sheepLeft = sheeps.toMutableSet()
+                        sheepLeft.remove(sheep)
+                        sheepLeft.add(move)
+                        count += getWins(grid, winStates, dragon, sheepLeft, true)
+                    }
+                    hadMove = true
+                }
+            }
+            if (!hadMove) {
+                count += getWins(grid, winStates, dragon, sheeps, true)
+            }
+        }
+        winStates[stateKey] = count
+        return count
+    }
+
+    fun Grid<Char>.isSafeForever(current: Point2D<Int>): Boolean {
+        var isSafe = true
+        for (y in current.y..yRange.last) {
+            isSafe = isSafe && this[current.x, y] == '#'
+        }
+        return isSafe
     }
 
     fun Grid<Char>.getDragonMoves(currents: Set<Point2D<Int>>): Set<Point2D<Int>> {
@@ -114,7 +165,7 @@ class Puzzle : BasePuzzle() {
         return moves.filter { isInBounds(it) }.toSet()
     }
 
-    fun Grid<Char>.moveAllSheep(sheeps: Set<Point2D<Int>>): MutableSet<Point2D<Int>> {
+    fun Grid<Char>.getSheepMoves(sheeps: Set<Point2D<Int>>): MutableSet<Point2D<Int>> {
         val newSheep = mutableSetOf<Point2D<Int>>()
         for (sheep in sheeps) {
             newSheep.add(Point2D(sheep.x, sheep.y + 1))
