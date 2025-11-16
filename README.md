@@ -11,3 +11,10 @@ under `/src/test/` when competing).
 
 While I am making this source code available for public viewing, I am not releasing it for reuse or modification at 
 this time.
+
+## Possible Optimizations
+
+I may get around to optimizing these slow algorithms some day:
+- y24 q12 p3 (8:32)
+- y24 q19 p3 (23:35)
+- y24 q20 p2 (7:17)
