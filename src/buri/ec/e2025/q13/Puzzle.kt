@@ -2,7 +2,6 @@ package buri.ec.e2025.q13
 
 import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
-import buri.ec.common.extractInts
 import org.junit.Test
 
 /**
