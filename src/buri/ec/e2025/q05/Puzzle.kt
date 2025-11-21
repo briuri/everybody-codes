@@ -50,6 +50,7 @@ class Puzzle : BasePuzzle() {
             return (qualities.max() - qualities.min()).toString()
         }
 
+        // Part Three
         fishbones.sortDescending()
         val checksum = fishbones.mapIndexed { index, it -> (index + 1) * it.id }.sum()
         return checksum.toString()

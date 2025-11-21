@@ -107,9 +107,7 @@ data class Edge(val start: Int, val end: Int) {
 
     companion object {
         fun fromInput(first: Int, second: Int): Edge {
-            val list = mutableListOf<Int>()
-            list.add(first)
-            list.add(second)
+            val list = mutableListOf(first, second)
             list.sort()
             return Edge(list.first(), list.last())
         }

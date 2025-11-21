@@ -41,6 +41,7 @@ class Puzzle : BasePuzzle() {
         val hideouts = grid.filter { it == '#' }
 
         if (part.isOne()) {
+            // Account for smaller example size.
             val rounds = if (input.size < 14) {
                 3
             } else {
@@ -54,6 +55,7 @@ class Puzzle : BasePuzzle() {
             }
             return dragonMoves.intersect(sheeps).size
         } else if (part.isTwo()) {
+            // Account for smaller example size.
             val rounds = if (input.size < 14) {
                 3
             } else {

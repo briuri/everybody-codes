@@ -39,6 +39,7 @@ class Puzzle : BasePuzzle() {
             val rawNumbers = line.extractLongs()
             numbers[line.first()] = ComplexNum(rawNumbers[0], rawNumbers[1])
         }
+
         if (part.isOne()) {
             var result = ComplexNum(0, 0)
             repeat(3) {
@@ -49,6 +50,11 @@ class Puzzle : BasePuzzle() {
             return result.toString()
         }
 
+        val resolution = if (part.isTwo()) {
+            10L
+        } else {
+            1L
+        }
         val gridSize = ComplexNum(1000, 1000)
         val dividend = ComplexNum(100_000, 100_000)
         val engraveRange = -1_000_000..1000000
@@ -56,11 +62,6 @@ class Puzzle : BasePuzzle() {
         val lr = ul.add(gridSize)
 
         var engraveCount = 0
-        val resolution = if (part.isTwo()) {
-            10L
-        } else {
-            1L
-        }
         for (y in (ul.y)..(lr.y) step resolution) {
             for (x in (ul.x)..(lr.x) step resolution) {
                 var result = ComplexNum(0, 0)

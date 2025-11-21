@@ -77,12 +77,7 @@ class Puzzle : BasePuzzle() {
             }
         }
         val maxFamilySize = families.maxOf { it.size }
-        for (family in families) {
-            if (family.size == maxFamilySize) {
-                return family.sum()
-            }
-        }
-        throw Exception("No largest family.")
+        return families.first { it.size == maxFamilySize }.sum()
     }
 
     fun findParents(scales: Map<Int, List<Char>>, childId: Int): List<Int> {

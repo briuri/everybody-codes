@@ -56,8 +56,7 @@ class Puzzle : BasePuzzle() {
             if (!matchesRules(rules, name)) {
                 continue
             }
-            var names = mutableSetOf<String>()
-            names.add(name)
+            var names = mutableSetOf(name)
             repeat(11 - name.length) {
                 val newNames = mutableSetOf<String>()
                 for (name in names) {

@@ -39,25 +39,32 @@ class Puzzle : BasePuzzle() {
         var index = 0
         for (instruction in instructions) {
             index += getOffset(instruction)
-            if (part.isOne()) {
-                index = index.coerceAtLeast(0).coerceAtMost(names.lastIndex)
-            } else {
-                while (index < 0) {
-                    index += names.size
-                }
-                index %= names.size
-                if (part.isThree()) {
-                    val temp = names[index]
-                    names[index] = names[0]
-                    names[0] = temp
-                    index = 0
-                }
+            index = getBoundedIndex(part, index, names.size)
+            if (part.isThree()) {
+                val swap = names[index]
+                names[index] = names[0]
+                names[0] = swap
+                index = 0
             }
         }
         return names[index]
 
     }
 
+    // Returns a min/max bounded index in Part 1, and a circular index in Part 2/3.
+    fun getBoundedIndex(part: Part, index: Int, size: Int): Int {
+        if (part.isOne()) {
+            return index.coerceAtLeast(0).coerceAtMost(size - 1)
+        }
+        var newIndex = index
+        while (newIndex < 0) {
+            newIndex += size
+        }
+        newIndex %= size
+        return newIndex
+    }
+
+    // Translates an instruction into a numeric offset.
     fun getOffset(instruction: String): Int {
         val direction = if (instruction.startsWith("L")) {
             -1
