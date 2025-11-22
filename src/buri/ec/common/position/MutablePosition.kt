@@ -7,9 +7,9 @@ import buri.ec.common.position.Direction.*
  *
  * @author Brian Uri!
  */
-data class MutablePosition(var coords: Point2D<Int>, var facing: Direction = NORTH) {
+data class MutablePosition(var coords: Point2D<Long>, var facing: Direction = NORTH) {
 
-    constructor(x: Int, y: Int, facing: Direction) : this(Point2D(x, y), facing)
+    constructor(x: Long, y: Long, facing: Direction) : this(Point2D(x, y), facing)
 
     /**
      * Adjusts facing and moves in that direction.
@@ -23,11 +23,18 @@ data class MutablePosition(var coords: Point2D<Int>, var facing: Direction = NOR
      * Move one square in the current direction.
      */
     fun move() {
+        move(1L)
+    }
+
+    /**
+     * Move multiple squares.
+     */
+    fun move(length: Long) {
         coords = when (facing) {
-            NORTH -> coords.copy(y = coords.y - 1)
-            EAST -> coords.copy(x = coords.x + 1)
-            SOUTH -> coords.copy(y = coords.y + 1)
-            WEST -> coords.copy(x = coords.x - 1)
+            NORTH -> coords.copy(y = coords.y - length)
+            EAST -> coords.copy(x = coords.x + length)
+            SOUTH -> coords.copy(y = coords.y + length)
+            WEST -> coords.copy(x = coords.x - length)
         }
     }
 
