@@ -33,6 +33,12 @@ class Puzzle : BasePuzzle() {
      * Executes a part of the puzzle using the specified input.
      */
     override fun run(part: Part, input: List<String>): Number {
-        return -1
+        if (part.isOne()) {
+            return -1
+        } else if (part.isTwo()) {
+            return -1
+        } else {
+            return -1
+        }
     }
 }
