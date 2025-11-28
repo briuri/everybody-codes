@@ -59,7 +59,7 @@ class Puzzle : BasePuzzle() {
             }
             allStarts = newStarts
         }
-        return allStarts.map { it.cost }.min()
+        return allStarts.minOfOrNull { it.cost }!!
     }
 }
 
