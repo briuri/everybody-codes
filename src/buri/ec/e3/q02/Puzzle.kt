@@ -4,12 +4,9 @@ import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
 import buri.ec.common.Pathfinder
 import buri.ec.common.position.Bounds2D
-import buri.ec.common.position.Direction
 import buri.ec.common.position.Grid
-import buri.ec.common.position.MutablePosition
 import buri.ec.common.position.Point2D
 import buri.ec.common.position.getNeighbors
-import buri.ec.e2025.q20.Cell
 import org.junit.Test
 
 /**
@@ -34,9 +31,9 @@ class Puzzle : BasePuzzle() {
     @Test
     fun runPart3() {
         assertRun(87, 1)
-//        assertRun(239, 2)
-//        assertRun(1539, 3)
-//        assertRun(0, 0, true)
+        assertRun(239, 2)
+        assertRun(1539, 3)
+        assertRun(2921, 0, true)
     }
 
     /**
@@ -79,9 +76,15 @@ class Puzzle : BasePuzzle() {
         if (!part.isOne()) {
             visited.addAll(ends)
             endNeighbors.addAll(ends.flatMap { it.getNeighbors() })
+            // Ignore internal end neighbors
+            val internalNeighbors = mutableSetOf<Point2D<Int>>()
+            for (neighbor in endNeighbors) {
+                internalNeighbors.addAll(getInternalSurrounded(neighbor, visited))
+            }
+            endNeighbors.removeAll(internalNeighbors)
         }
         while (true) {
-            val nextDirection = deltas[deltaIndex % 4]
+            val nextDirection = deltas[deltaIndex % deltas.size]
             val nextPos = Point2D(pos.x + nextDirection.x, pos.y + nextDirection.y)
             if (nextPos !in visited) {
                 pos = nextPos
