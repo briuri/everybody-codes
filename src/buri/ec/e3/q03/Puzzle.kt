@@ -27,7 +27,7 @@ class Puzzle : BasePuzzle() {
     fun runPart3() {
         assertRun(38, 1)
         assertRun(60, 2)
-        assertRun(0, 0, true)
+        assertRun(421164, 0, true)
     }
 
     /**
@@ -46,14 +46,17 @@ class Puzzle : BasePuzzle() {
             if (root == null) {
                 root = node
             } else {
-                root.connect(part, node)
+                var nodeToConnect = root.connect(part, node)
+                // Handle nodes that have been pushed off the right side without finding a match.
+                while (nodeToConnect != null) {
+                    nodeToConnect = root.connect(part, nodeToConnect)
+                }
             }
         }
 
         val readNodes = mutableListOf<Int>()
         root!!.read(readNodes)
-        val checksum = readNodes.mapIndexed { index, value -> value * (index + 1) }.sum()
-        return checksum
+        return readNodes.mapIndexed { index, value -> value * (index + 1) }.sum()
     }
 }
 
@@ -61,38 +64,6 @@ data class Node(val id: Int, val plug: String, val leftSocket: String, val right
     var parent: Node? = null
     var leftNode: Node? = null
     var rightNode: Node? = null
-
-    fun connect(part: Part, node: Node?): Node? {
-        var nodeToConnect: Node? = node
-        if (nodeToConnect != null) {
-            if (leftNode != null) {
-                nodeToConnect = leftNode!!.connect(part, nodeToConnect)
-            } else if (plugFits(part, nodeToConnect.plug, leftSocket)) {
-                nodeToConnect.parent = this
-                leftNode = nodeToConnect
-                nodeToConnect = null
-            }
-        }
-        if (nodeToConnect != null) {
-            if (rightNode != null) {
-                nodeToConnect = rightNode!!.connect(part, nodeToConnect)
-            } else if (plugFits(part, nodeToConnect.plug, rightSocket)) {
-                nodeToConnect.parent = this
-                rightNode = nodeToConnect
-                nodeToConnect = null
-            }
-        }
-        return nodeToConnect
-    }
-
-    fun plugFits(part: Part, plug: String, socket: String): Boolean {
-        if (part.isOne()) {
-            return (plug == socket)
-        }
-        val plugTokens = plug.split(" ")
-        val socketTokens = socket.split(" ")
-        return (plug == socket || plugTokens[0] == socketTokens[0] || plugTokens[1] == socketTokens[1])
-    }
 
     fun read(listSoFar: MutableList<Int>) {
         if (leftNode != null) {
@@ -102,5 +73,77 @@ data class Node(val id: Int, val plug: String, val leftSocket: String, val right
         if (rightNode != null) {
             rightNode!!.read(listSoFar)
         }
+    }
+
+    fun connect(part: Part, node: Node?): Node? {
+        var nodeToConnect: Node? = node
+        if (!part.isThree()) {
+            if (nodeToConnect != null) {
+                if (leftNode != null) {
+                    nodeToConnect = leftNode!!.connect(part, nodeToConnect)
+                } else if (isStrong(nodeToConnect.plug, leftSocket)
+                    || (part.isTwo() && isWeak(nodeToConnect.plug, leftSocket))
+                ) {
+                    nodeToConnect.parent = this
+                    leftNode = nodeToConnect
+                    nodeToConnect = null
+                }
+            }
+            if (nodeToConnect != null) {
+                if (rightNode != null) {
+                    nodeToConnect = rightNode!!.connect(part, nodeToConnect)
+                } else if (isStrong(nodeToConnect.plug, rightSocket)
+                    || (part.isTwo() && isWeak(nodeToConnect.plug, rightSocket))
+                ) {
+                    nodeToConnect.parent = this
+                    rightNode = nodeToConnect
+                    nodeToConnect = null
+                }
+            }
+        } else {
+            if (nodeToConnect != null) {
+                val strongCondition = isStrong(nodeToConnect.plug, leftSocket)
+                        && (leftNode == null || (leftNode != null && isWeak(leftNode!!.plug, leftSocket)))
+                // Weak can fill empty sockets.
+                val weakCondition = isWeak(nodeToConnect.plug, leftSocket) && leftNode == null
+                if (strongCondition || weakCondition) {
+                    val oldLeft = leftNode
+                    oldLeft?.parent = null
+                    nodeToConnect.parent = this
+                    leftNode = nodeToConnect
+                    nodeToConnect = oldLeft
+                } else if (leftNode != null) {
+                    nodeToConnect = leftNode!!.connect(part, nodeToConnect)
+                }
+            }
+
+            if (nodeToConnect != null) {
+                // Strong can replace empty or weak (but not other strong).
+                val strongCondition = isStrong(nodeToConnect.plug, rightSocket)
+                        && (rightNode == null || (rightNode != null && isWeak(rightNode!!.plug, rightSocket)))
+                // Weak can fill empty sockets.
+                val weakCondition = isWeak(nodeToConnect.plug, rightSocket) && rightNode == null
+                if (strongCondition || weakCondition) {
+                    val oldRight = rightNode
+                    oldRight?.parent = null
+                    nodeToConnect.parent = this
+                    rightNode = nodeToConnect
+                    nodeToConnect = oldRight
+                } else if (rightNode != null) {
+                    nodeToConnect = rightNode!!.connect(part, nodeToConnect)
+                }
+            }
+        }
+        return nodeToConnect
+    }
+
+    fun isStrong(plug: String, socket: String): Boolean {
+        return (plug == socket)
+    }
+
+    fun isWeak(plug: String, socket: String): Boolean {
+        val plugTokens = plug.split(" ")
+        val socketTokens = socket.split(" ")
+        return (plug != socket && (plugTokens[0] == socketTokens[0] || plugTokens[1] == socketTokens[1]))
     }
 }
