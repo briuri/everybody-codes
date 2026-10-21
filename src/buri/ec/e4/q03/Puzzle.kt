@@ -2,10 +2,9 @@ package buri.ec.e4.q03
 
 import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
-import buri.ec.common.Pathfinder
 import buri.ec.common.position.Point2D
-import buri.ec.common.position.getNeighbors
 import org.junit.Test
+import kotlin.collections.set
 import kotlin.math.max
 
 /**
@@ -31,7 +30,7 @@ class Puzzle : BasePuzzle() {
 
     @Test
     fun runPart3() {
-        assertRun(0, 0, true)
+        assertRun(529497857464808, 0, true)
     }
 
     /**
@@ -40,85 +39,132 @@ class Puzzle : BasePuzzle() {
     override fun run(part: Part, input: List<String>): Number {
         val width = input[0].split("=")[1].toInt()
         val height = input[1].split("=")[1].toInt()
-        var hOffsets = input[2].split("=")[1]
-        var vOffsets = input[3].split("=")[1]
-        val floor = Floor(
-            width,
-            height,
-            hOffsets.repeat(height / hOffsets.length + 1),
-            vOffsets.repeat(width / vOffsets.length + 1)
-        )
+        val hOffsets = input[2].split("=")[1]
+        val vOffsets = input[3].split("=")[1]
 
         if (part.isOne()) {
-            return floor.getEnclosed().size
-        } else if (part.isTwo()) {
-            val enclosed = floor.getEnclosed()
-            val first = enclosed.filter { floor.getColor(it) }
-            val second = enclosed.filter { !floor.getColor(it) }
-            return max(first.size, second.size)
-        } else {
-            return -1
+            val floor = Floor(width, height, hOffsets, vOffsets)
+            return floor.enclosedPoints.size
         }
+        if (part.isTwo()) {
+            val floor = Floor(width, height, hOffsets, vOffsets)
+            val (first, second) = floor.getColors()
+            return max(first, second)
+        }
+        // Part Three
+        // Break up grid into 4 parts, complete, remainder right, remainder bottom, and remainder bottom right.
+        val subWidth = vOffsets.length * 2
+        val subHeight = hOffsets.length * 2
+        val xRepeats = width / subWidth
+        val xRemainder = width % subWidth
+        val yRepeats = height / subHeight
+        val yRemainder = height % subHeight
+
+        var color1 = 0L
+        var color2 = 0L
+
+        // Complete
+        var colors = Floor(subWidth, subHeight, hOffsets, vOffsets).getColors()
+        color1 += colors.first * xRepeats * yRepeats
+        color2 += colors.second * xRepeats * yRepeats
+
+        // Right
+        colors = Floor(xRemainder, subHeight, hOffsets, vOffsets).getColors()
+        color1 += colors.first * yRepeats
+        color2 += colors.second * yRepeats
+
+        // Bottom
+        colors = Floor(subWidth, yRemainder, hOffsets, vOffsets).getColors()
+        color1 += colors.first * xRepeats
+        color2 += colors.second * xRepeats
+
+        // Bottom Right
+        colors = Floor(xRemainder, yRemainder, hOffsets, vOffsets).getColors()
+        color1 += colors.first
+        color2 += colors.second
+
+        return max(color1, color2)
     }
 }
 
-data class Floor(val width: Int, val height: Int, val hOffsets: String, val vOffsets: String) {
-    val xBounds = 0..<width
-    val yBounds = 0..<height
+data class Floor(
+    val width: Int,
+    val height: Int,
+    val hOffsets: String,
+    val vOffsets: String
+) {
+    val connectedPoints = mutableMapOf<Point2D<Int>, Point2D<Int>>()
+    val enclosedPoints = mutableListOf<Point2D<Int>>()
     val colors = mutableMapOf<Point2D<Int>, Boolean>()
-    val pathfinder =
-        Pathfinder<Point2D<Int>> { current -> getNeighbors(current).filter { it.x in xBounds && it.y in yBounds } }
 
     init {
-        var currentColor = true
-        for (y in 0..<height) {
-            for (x in 0..<width) {
-                val point = Point2D(x, y)
-                if (point !in colors) {
-                    val cameFrom = pathfinder.exploreFrom(point)
-                    for (connectedPoint in cameFrom.keys) {
-                        colors[connectedPoint] = currentColor
-                    }
-                    currentColor = !currentColor
-                } else {
-                    currentColor = !colors[point]!!
+        // Connect grouped tiles.
+        for (y in 0..height) {
+            for (x in 0..width) {
+                connectedPoints[Point2D(x, y)] = Point2D(x, y)
+            }
+        }
+        for (y in 0..height) {
+            for (x in 1..width) {
+                if (!hasStitchLeft(Point2D(x, y))) {
+                    connect(Point2D(x - 1, y), Point2D(x, y))
                 }
             }
         }
-    }
+        for (y in 1..height) {
+            for (x in 0..width) {
+                if (!hasStitchTop(Point2D(x, y))) {
+                    connect(Point2D(x, y - 1), Point2D(x, y))
+                }
+            }
+        }
 
-    fun getColor(current: Point2D<Int>): Boolean {
-        return colors[current]!!
-    }
-
-    fun getNeighbors(current: Point2D<Int>): List<Point2D<Int>> {
-        val neighbors = mutableListOf<Point2D<Int>>()
-        if (!hasStitchTop(current)) {
-            neighbors.add(Point2D(current.x, current.y - 1))
-        }
-        if (!hasStitchBottom(current)) {
-            neighbors.add(Point2D(current.x, current.y + 1))
-        }
-        if (!hasStitchLeft(current)) {
-            neighbors.add(Point2D(current.x - 1, current.y))
-        }
-        if (!hasStitchRight(current)) {
-            neighbors.add(Point2D(current.x + 1, current.y))
-        }
-        return neighbors
-    }
-
-    fun getEnclosed(): List<Point2D<Int>> {
-        val points = mutableListOf<Point2D<Int>>()
+        // Find enclosed tiles.
         for (y in 0..<height) {
             for (x in 0..<width) {
                 val point = Point2D(x, y)
                 if (isEnclosed(point)) {
-                    points.add(point)
+                    enclosedPoints.add(point)
                 }
             }
         }
-        return points
+
+        // Color tiles.
+        colors[getGroupStart(Point2D(0, 0))] = false
+        for (y in 0..height) {
+            for (x in 0..width) {
+                val groupStart = getGroupStart(Point2D(x, y))
+                if (groupStart !in colors) {
+                    val current = if (y == 0) {
+                        Point2D(x - 1, 0)
+                    } else {
+                        Point2D(x, y - 1)
+                    }
+                    colors[groupStart] = !colors[getGroupStart(current)]!!
+                }
+            }
+        }
+    }
+
+    fun getGroupStart(current: Point2D<Int>): Point2D<Int> {
+        if (connectedPoints[current] == current) {
+            return current
+        }
+        val groupStart = getGroupStart(connectedPoints[current]!!)
+        // Optimize lookup for next time.
+        connectedPoints[current] = groupStart
+        return groupStart
+    }
+
+    fun connect(left: Point2D<Int>, right: Point2D<Int>) {
+        connectedPoints[getGroupStart(left)] = getGroupStart(right)
+    }
+
+    fun getColors(): Pair<Long, Long> {
+        return Pair(
+            enclosedPoints.filter { colors[it]!! }.size.toLong(),
+            enclosedPoints.filter { !colors[it]!! }.size.toLong()
+        )
     }
 
     fun isEnclosed(pos: Point2D<Int>): Boolean {
@@ -126,7 +172,7 @@ data class Floor(val width: Int, val height: Int, val hOffsets: String, val vOff
     }
 
     fun hasStitchTop(pos: Point2D<Int>): Boolean {
-        val offset = hOffsets[pos.y].digitToInt()
+        val offset = hOffsets[pos.y % hOffsets.length].digitToInt()
         return (pos.x % 2 == offset)
     }
 
@@ -135,7 +181,7 @@ data class Floor(val width: Int, val height: Int, val hOffsets: String, val vOff
     }
 
     fun hasStitchLeft(pos: Point2D<Int>): Boolean {
-        val offset = vOffsets[pos.x].digitToInt()
+        val offset = vOffsets[pos.x % vOffsets.length].digitToInt()
         return (pos.y % 2 == offset)
     }
 
