@@ -15,7 +15,7 @@ fun main() {
         val matchResult = fileNamePattern.matchEntire(file.name)
         if (matchResult != null) {
             val (year, quest, part) = matchResult.destructured
-            val targetDirectory = File(dataDir, "$year")
+            val targetDirectory = File(dataDir, year)
             targetDirectory.mkdirs()
             val inputPath = File(targetDirectory, "$quest-$part-0.txt")
             Files.copy(file.toPath(), inputPath.toPath(), StandardCopyOption.REPLACE_EXISTING)
