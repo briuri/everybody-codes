@@ -7,7 +7,7 @@ import java.nio.file.StandardCopyOption
 fun main() {
     val downloadsDir = File("/Users/BU/Downloads")
     val dataDir = File("/workspace/everybody-codes/data")
-    val fileNamePattern = """everybody_codes_e(\d{4})_q(\d{2})_p(\d{1})\.txt""".toRegex()
+    val fileNamePattern = """everybody_codes_e(\d{4})_q(\d{2})_p(\d)\.txt""".toRegex()
 
     downloadsDir.listFiles { file ->
         file.isFile && fileNamePattern.matches(file.name)
