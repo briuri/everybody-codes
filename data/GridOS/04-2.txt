@@ -1,0 +1,19 @@
+HEADS AA
+START ## START ** SR
+START #= START ** SR
+START #| GO_D ** DD
+
+GO_D #! GO_D ** DD
+GO_D #_ GO_D ** SL
+GO_D __ GO_U ** UU
+
+GO_U #_ GO_U ** UU
+GO_U #| GO_U ** UU
+GO_U #= HAMMER *| SR
+GO_U __ STOP ** SS
+
+HAMMER #= HAMMER *_ SR
+HAMMER #| STOP_HAMMER *_ SS
+
+STOP_HAMMER #_ STOP_HAMMER ** SL
+STOP_HAMMER #| GO_U ** UU

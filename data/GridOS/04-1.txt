@@ -1,0 +1,15 @@
+HEADS AA/B
+START **/* START2 **/* SR/D
+START2 **/* GO_R **/@ SS/S
+
+GO_R #=/* GO_R **/* RR/S
+GO_R ==/* GO_R **/* RR/S
+GO_R =|/* GO_L |_/* LL/S
+GO_R #|/* GO_D **/* DD/S
+
+GO_L =|/* GO_L **/* LL/S
+GO_L ==/* GO_L **/* LL/S
+GO_L #!/* GO_D **/* DD/S
+
+GO_D @_/* STOP **/_ SS/S
+GO_D #!/* GO_R **/* SS/S

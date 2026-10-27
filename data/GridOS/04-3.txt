@@ -1,0 +1,35 @@
+HEADS AA/AA
+START ##/** START **/** SR/SS
+START #=/** START **/** SR/SS
+START #|/** GO_D **/** DD/SS
+
+GO_D #!/** GO_D **/** DD/SS
+GO_D #_/** GO_D **/** SL/SS
+GO_D __/** GO_U **/** UU/SS
+
+GO_U #_/** GO_U **/** UU/SS
+GO_U #=/** GO_U **/** UU/SS
+GO_U #|/** GO_U @*/** UU/SS
+GO_U __/** START2 **/** SS/SS
+
+START2 **/@@ START2 **/** SS/DD
+START2 **/## START2 **/** SS/SR
+START2 **/#= START2 **/** SS/SR
+START2 **/#| GO_D2 **/** SS/DD
+
+GO_D2 **/#! GO_D2 **/** SS/DD
+GO_D2 **/#_ GO_D2 **/** SS/SL
+GO_D2 **/@* GO_D2 **/** SS/DD
+GO_D2 **/__ GO_U2 **/** SS/UU
+
+GO_U2 **/#_ GO_U2 **/** SS/UU
+GO_U2 **/#| GO_U2 **/** SS/UU
+GO_U2 **/@* GO_U2 **/#* SS/UU
+GO_U2 **/#= HAMMER **/*| SS/SR
+GO_U2 **/__ STOP **/** SS/SS
+
+HAMMER **/#= HAMMER **/*_ SS/SR
+HAMMER **/#| STOP_HAMMER **/*_ SS/SS
+
+STOP_HAMMER **/#_ STOP_HAMMER **/** SS/SL
+STOP_HAMMER **/#| GO_U2 **/** SS/UU
