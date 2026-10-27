@@ -1,0 +1,27 @@
+HEADS AA/AA/B
+START **/**/* START2 **/**/* SR/SD/U
+START2 **/**/* ROW_R **/**/* SS/SS/U
+
+ROW_R AA/**/* ROW_R **/**/@ RR/SS/R
+ROW_R BB/**/* ROW_R **/**/@ RR/SS/R
+ROW_R AB/**/* ROW_R **/**/* RR/SS/S
+ROW_R BA/**/* ROW_R **/**/* RR/SS/S
+ROW_R !_/**/* ROW_L **/**/* LL/SS/S
+
+ROW_L !!/**/* ROW_L **/**/* LL/SS/S
+ROW_L _!/**/* ROW_D **/**/* DD/SS/S
+
+ROW_D _!/**/* ROW_R **/**/* RR/SS/S
+ROW_D __/**/* COL_D **/**/* SS/SS/S
+
+COL_D **/AA/* COL_D **/**/@ SS/DD/R
+COL_D **/BB/* COL_D **/**/@ SS/DD/R
+COL_D **/AB/* COL_D **/**/* SS/DD/S
+COL_D **/BA/* COL_D **/**/* SS/DD/S
+COL_D **/!_/* COL_U **/**/* SS/UU/S
+
+COL_U **/!!/* COL_U **/*_/* SS/UU/S
+COL_U **/_!/* COL_R **/*_/* SS/RR/S
+
+COL_R **/_!/* COL_D **/**/* SS/DD/S
+COL_R **/__/* STOP **/**/* SS/SS/S

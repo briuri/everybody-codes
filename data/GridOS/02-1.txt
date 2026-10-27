@@ -1,0 +1,9 @@
+HEADS AAA/B
+START ***/* COUNT ***/* LSR/D
+
+COUNT *AA/* COUNT _**/@ RRR/R
+COUNT *BB/* COUNT _**/@ RRR/R
+COUNT *AB/* COUNT _**/* RRR/S
+COUNT *BA/* COUNT _**/* RRR/S
+COUNT *A_/* STOP __*/* RRR/S
+COUNT *B_/* STOP __*/* RRR/S
