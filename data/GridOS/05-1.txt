@@ -1,0 +1,21 @@
+HEADS AAA/C
+START .../* START +**/E SRD/S
+START +../* GO_R ***/* SSS/S
+
+GO_R +../* GO_R ***/* RRR/S
+GO_R ..@/* GO_R +**/* RRR/S
+GO_R .../* GO_D +**/* DDS/S
+
+GO_D .@./* GO_D +**/* DDS/S
+GO_D ..+/* GO_R2 +**/* RRR/S
+GO_D ._./* GO_D +**/* DDS/S
+GO_D E_+/* STOP +**/* SSS/S
+
+GO_R2 +../* GO_R2 ***/* RRR/S
+GO_R2 ..@/* GO_R2 +**/* RRR/S
+GO_R2 .../* GO_U +**/* UUS/S
+
+GO_U .@./* GO_U +**/* UUS/S
+GO_U ..+/* GO_R +**/* RRR/S
+
+GO_R ._./* GO_D +**/* DDS/S

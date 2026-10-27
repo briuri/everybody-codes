@@ -1,0 +1,53 @@
+HEADS A/AAAA
+START */**** START2 */**** S/URDL
+START2 */**** START3 */**** S/SSSS
+START3 */**** H_R +/**** R/RRRR
+
+H_R ./_.@* H_R +/**** R/RRRR 
+H_R ./@..+ H_R +/**** R/RRRR 
+H_R ./@.@+ H_R +/**** R/RRRR 
+H_R ./@+@+ H_R +/**** R/RRRR 
+H_R ./_..+ H_D +/**** D/DDDD 
+H_R ./__.+ H_D +/**** D/DDDD 
+H_R ./._.+ H_D +/**** D/DDDD 
+H_R ./...+ H_U +/**** U/UUUU 
+H_R ./..@+ H_U +/**** U/UUUU 
+H_R ./.+@+ H_U +/**** U/UUUU 
+H_R +/.+++ H_U +/**** U/UUUU 
+
+H_D ./+@.@ H_D +/**** D/DDDD 
+H_D ./+_.@ H_D +/**** D/DDDD 
+H_D ./+@.. H_D +/**** D/DDDD 
+H_D ./+.@. H_R +/**** R/RRRR 
+H_D ./@.@+ H_R +/**** R/RRRR 
+H_D ./+... H_R +/**** R/RRRR 
+H_D ./+__. H_L +/**** L/LLLL 
+H_D ./+_.. H_L +/**** L/LLLL 
+H_D ./+._. H_L +/**** L/LLLL 
+
+H_U ./.@+@ H_U +/**** U/UUUU 
+H_U ./.@+_ H_U +/**** U/UUUU 
+H_U ./..+@ H_U +/**** U/UUUU 
+H_U ./+@+@ H_U +/**** U/UUUU 
+H_U ./+.+@ H_U +/**** U/UUUU 
+H_U ./..+_ H_R +/**** R/RRRR 
+H_U ./_.+. H_R +/**** R/RRRR
+H_U ./+++. H_L +/**** L/LLLL 
+H_U +/+++. H_L +/**** L/LLLL 
+H_U ./..+. H_L +/**** L/LLLL
+H_U ./@.+. H_L +/**** L/LLLL
+H_U ./@++. H_L +/**** L/LLLL
+H_U ./.++. H_L +/**** L/LLLL
+H_U ./+@+_ STOP +/**** S/SSSS
+
+H_L ./@+@! H_L +/**** L/LLLL 
+H_L ./@+_! H_L +/**** L/LLLL 
+H_L ./.+@. H_L +/**** L/LLLL 
+H_L ./.+.. H_D +/**** D/DDDD 
+H_L ./@+.+ H_D +/**** D/DDDD 
+H_L +/++.+ H_D +/**** D/DDDD 
+H_L +/@+.+ H_D +/**** D/DDDD 
+H_L ./@+.. H_D +/**** D/DDDD 
+H_L ./.+_. H_U +/**** U/UUUU 
+H_L ./.+__ H_U +/**** U/UUUU 
+H_L ./.+._ H_U +/**** U/UUUU 
