@@ -1,0 +1,41 @@
+HEADS AA/AA/B
+START **/**/* COUNT **/**/* SD/SD/R
+
+COUNT A_/**/* COUNT 00/**/* RR/SS/S
+COUNT AA/**/* COUNT 11/**/* RR/SS/S
+COUNT AB/**/* COUNT 12/**/* RR/SS/S
+COUNT AC/**/* COUNT 14/**/* RR/SS/S
+COUNT AD/**/* COUNT 16/**/* RR/SS/S
+COUNT B_/**/* COUNT 10/**/* RR/SS/S
+COUNT BA/**/* COUNT 21/**/* RR/SS/S
+COUNT BB/**/* COUNT 22/**/* RR/SS/S
+COUNT BC/**/* COUNT 24/**/* RR/SS/S
+COUNT BD/**/* COUNT 26/**/* RR/SS/S
+COUNT C_/**/* COUNT 30/**/* RR/SS/S
+COUNT CA/**/* COUNT 41/**/* RR/SS/S
+COUNT CB/**/* COUNT 42/**/* RR/SS/S
+COUNT CC/**/* COUNT 44/**/* RR/SS/S
+COUNT CD/**/* COUNT 46/**/* RR/SS/S
+COUNT D_/**/* COUNT 50/**/* RR/SS/S
+COUNT DA/**/* COUNT 61/**/* RR/SS/S
+COUNT DB/**/* COUNT 62/**/* RR/SS/S
+COUNT DC/**/* COUNT 64/**/* RR/SS/S
+COUNT DD/**/* COUNT 66/**/* RR/SS/S
+COUNT __/**/* CALC **/**/* SS/SS/S
+
+CALC **/0!/* CALC **/_*/* SS/SS/S
+CALC **/1!/* CALC **/_*/P SS/SS/R
+CALC **/2!/* CALC **/1*/P SS/SS/R
+CALC **/3!/* CALC **/2*/P SS/SS/R
+CALC **/4!/* CALC **/3*/P SS/SS/R
+CALC **/5!/* CALC **/4*/P SS/SS/R
+CALC **/6!/* CALC **/5*/P SS/SS/R
+CALC **/_0/* CALC **/*_/* SS/RR/R
+CALC **/_1/* CALC **/*_/P SS/RR/R
+CALC **/_2/* CALC **/*1/P SS/SS/R
+CALC **/_3/* CALC **/*2/P SS/SS/R
+CALC **/_4/* CALC **/*3/P SS/SS/R
+CALC **/_5/* CALC **/*4/P SS/SS/R
+CALC **/_6/* CALC **/*5/P SS/SS/R
+CALC **/__/* STOP **/**/* SS/SS/S
+CALC **/P_/* STOP **/**/* SS/SS/S
