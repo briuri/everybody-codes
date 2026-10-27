@@ -1,0 +1,27 @@
+HEADS AAA/A/A
+START ***/*/* START2 ***/*/* SRR/D/D
+START2 ***/*/* SEARCH ***/*/@ SSR/R/S
+
+SEARCH ###/*/* SEARCH ***/*/* RRR/R/S
+SEARCH ##=/*/* SEARCH ***/*/* RRR/R/S
+SEARCH =#=/*/* SEARCH ~**/*/* RRR/R/S
+SEARCH ~#=/*/* SEARCH ***/*/* RRR/R/S
+SEARCH #=#/*/* SEARCH *~*/*/* RRR/R/S
+SEARCH #==/*/* SEARCH ***/*/* RRR/R/S
+SEARCH ===/*/* SEARCH ~**/~/* RRR/R/S
+SEARCH =!#/*/* SEARCH ~**/*/* RRR/R/S
+SEARCH ~##/*/* SEARCH ***/*/* RRR/R/S
+
+SEARCH ##_/*/* REV_SEARCH ***/*/* DDD/D/S
+SEARCH =#_/*/* REV_SEARCH ~**/*/* DDD/D/S
+SEARCH ~#_/*/* REV_SEARCH ~**/*/* DDD/D/S
+SEARCH #__/*/* REV_SEARCH ***/*/* DDD/D/S
+
+REV_SEARCH ___/*/* REV_SEARCH ***/*/* LLL/L/S
+REV_SEARCH ~__/*/* REV_SEARCH ***/*/* LLL/L/S
+REV_SEARCH ~~_/*/* REV_SEARCH ***/*/* LLL/L/S
+REV_SEARCH ~~~/*/* REV_SEARCH ***/~/* LLL/L/S
+REV_SEARCH _~~/*/* REV_SEARCH ***/*/* LLL/L/S
+REV_SEARCH __~/*/* REV_SEARCH ***/*/* LLL/L/S
+REV_SEARCH _~_/*/* REV_SEARCH ***/*/* LLL/L/S
+REV_SEARCH @**/*/* STOP ***/*/_ SSS/S/S

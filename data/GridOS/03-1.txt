@@ -1,0 +1,18 @@
+HEADS AAA/A
+START ***/* START2 ***/* SRR/D
+START2 ***/* SEARCH ***/* SSR/R
+
+SEARCH ###/* SEARCH ***/* RRR/R
+SEARCH ##=/* SEARCH ***/* RRR/R
+SEARCH =#=/* SEARCH ~**/* RRR/R
+SEARCH ~#=/* SEARCH ***/* RRR/R
+SEARCH #=#/* SEARCH *~*/* RRR/R
+SEARCH #==/* SEARCH ***/* RRR/R
+SEARCH ===/* SEARCH ~**/~ RRR/R
+SEARCH =!#/* SEARCH ~**/* RRR/R
+SEARCH ~##/* SEARCH ***/* RRR/R
+
+SEARCH ##_/* STOP ***/* SSS/S
+SEARCH =#_/* STOP ~**/* SSS/S
+SEARCH ~#_/* STOP ~**/* SSS/S
+SEARCH #__/* STOP ***/* SSS/S

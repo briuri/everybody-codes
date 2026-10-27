@@ -1,0 +1,45 @@
+HEADS AAA/A/AB/B
+START ***/*/**/* START2 ***/*/**/* SRR/D/DD/U
+START2 ***/*/**/* START3 ***/*/@*/* SSR/R/SD/S
+START3 ***/*/**/* SEARCH ***/*/*@/* SSS/S/SS/S
+
+SEARCH ###/*/**/* SEARCH ***/*/**/* RRR/R/SS/S
+SEARCH ##=/*/**/* SEARCH ***/*/**/* RRR/R/SS/S
+SEARCH =#=/*/**/* SEARCH ~**/*/**/* RRR/R/SS/S
+SEARCH ~#=/*/**/* SEARCH ***/*/**/* RRR/R/SS/S
+SEARCH #=#/*/**/* SEARCH *~*/*/**/* RRR/R/SS/S
+SEARCH #==/*/**/* SEARCH ***/*/**/* RRR/R/SS/S
+SEARCH ===/*/**/* SEARCH ~**/~/**/* RRR/R/SS/S
+SEARCH =!#/*/**/* SEARCH ~**/*/**/* RRR/R/SS/S
+SEARCH ~##/*/**/* SEARCH ***/*/**/* RRR/R/SS/S
+
+SEARCH ##_/*/**/* DEEP_L ***/*/**/* DDD/D/SS/S
+SEARCH =#_/*/**/* DEEP_L ~**/*/**/* DDD/D/SS/S
+SEARCH ~#_/*/**/* DEEP_L ~**/*/**/* DDD/D/SS/S
+SEARCH #__/*/**/* DEEP_L ***/*/**/* DDD/D/SS/S
+
+DEEP_L ___/*/**/* DEEP_L ***/*/**/* LLL/L/SS/S
+DEEP_L ~__/*/**/* DEEP_L ***/*/**/* LLL/L/SS/S
+DEEP_L ~~_/*/**/* DEEP_L ***/*/**/* LLL/L/SS/S
+DEEP_L ~~~/*/**/* DEEP_L ***/~/**/1 LLL/L/SS/S
+DEEP_L _~~/*/**/* DEEP_L ***/*/**/* LLL/L/SS/S
+DEEP_L __~/*/**/* DEEP_L ***/*/**/* LLL/L/SS/S
+DEEP_L _~_/*/**/* DEEP_L ***/*/**/* LLL/L/SS/S
+DEEP_L @**/*/**/_ STOP ***/*/__/_ DDD/D/DS/S
+DEEP_L @**/*/**/1 MOVE_L_1 ***/*/_*/* DDD/D/DS/S
+
+MOVE_L_1 ***/*/**/* MOVE_L_2 ***/*/**/_ SSS/S/DS/S
+MOVE_L_2 ***/*/**/* DEEP_R ***/*/@*/* SSS/S/SS/S
+ 
+DEEP_R ___/*/**/* DEEP_R ***/*/**/* RRR/R/SS/S
+DEEP_R __~/*/**/* DEEP_R ***/*/**/* RRR/R/SS/S
+DEEP_R _~~/*/**/* DEEP_R ***/*/**/* RRR/R/SS/S
+DEEP_R ~~~/*/**/* DEEP_R ***/~/**/1 RRR/R/SS/S
+DEEP_R ~~_/*/**/* DEEP_R ***/*/**/* RRR/R/SS/S
+DEEP_R ~__/*/**/* DEEP_R ***/*/**/* RRR/R/SS/S
+DEEP_R _~_/*/**/* DEEP_R ***/*/**/* RRR/R/SS/S
+DEEP_R **@/*/**/_ STOP ***/*/__/_ DDD/D/SD/S
+DEEP_R **@/*/**/1 MOVE_R_1 ***/*/*_/* DDD/D/SD/S
+
+MOVE_R_1 ***/*/**/* MOVE_R_2 ***/*/**/_ SSS/S/SD/S
+MOVE_R_2 ***/*/**/* DEEP_L ***/*/*@/* SSS/S/SS/S
