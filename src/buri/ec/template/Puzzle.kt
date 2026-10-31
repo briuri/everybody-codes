@@ -2,6 +2,8 @@ package buri.ec.template
 
 import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
+import buri.ec.common.position.Grid
+import buri.ec.common.position.Point2D
 import org.junit.Test
 
 /**
