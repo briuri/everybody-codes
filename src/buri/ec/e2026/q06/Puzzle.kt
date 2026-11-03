@@ -3,6 +3,7 @@ package buri.ec.e2026.q06
 import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
 import org.junit.Test
+import org.junit.jupiter.api.assertTimeoutPreemptively
 
 /**
  * Entry point for a daily puzzle
@@ -59,19 +60,15 @@ class Puzzle : BasePuzzle() {
     fun Map<String, List<String>>.getIngredientsFor(food: String): Set<String> {
         val set = mutableSetOf<String>()
         set.add(food)
-        var previousSize = set.size
-        while (true) {
+        do {
+            val previousSize = set.size
             for (ingredient in set.toSet()) {
                 val children = this[ingredient]
                 if (children != null) {
                     set.addAll(children)
                 }
             }
-            if (set.size == previousSize) {
-                break
-            }
-            previousSize = set.size
-        }
+        } while (set.size != previousSize)
         set.remove(food)
         return set
     }
@@ -79,16 +76,12 @@ class Puzzle : BasePuzzle() {
     fun Map<String, List<String>>.getThingsMadeOf(ingredient: String): Set<String> {
         val set = mutableSetOf<String>()
         set.add(ingredient)
-        var previousSize = set.size
-        while (true) {
+        do {
+            val previousSize = set.size
             for (ingredient in set.toSet()) {
                 set.addAll(filter { it.value.contains(ingredient) }.map { it.key })
             }
-            if (set.size == previousSize) {
-                break
-            }
-            previousSize = set.size
-        }
+        } while (set.size != previousSize)
         set.remove(ingredient)
         return set
     }
