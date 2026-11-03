@@ -3,7 +3,6 @@ package buri.ec.e2026.q06
 import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
 import org.junit.Test
-import org.junit.jupiter.api.assertTimeoutPreemptively
 
 /**
  * Entry point for a daily puzzle
