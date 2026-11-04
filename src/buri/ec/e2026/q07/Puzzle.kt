@@ -45,8 +45,18 @@ class Puzzle : BasePuzzle() {
         }
         clouds.forEach { it.load(clouds) }
 
+        val startingClouds = mutableSetOf<Cloud>()
         if (!part.isThree()) {
-            val maxCloud = clouds.maxBy { it.nextIds.size }
+            startingClouds.add(clouds.maxBy { it.nextIds.size })
+        }
+        else {
+            startingClouds.addAll(clouds)
+        }
+
+        val threshold = if (input.size < 100) { 100L } else { 1_000_000L }
+        val results = mutableMapOf<Cloud, Long>()
+        for (maxCloud in startingClouds) {
+            clouds.forEach { it.reset() }
             var charges = mutableListOf<Triple<Cloud, Long, Long>>()
             charges.add(Triple(maxCloud, 1, if (part.isOne()) { 5 } else { 10 }))
             while (charges.isNotEmpty()) {
@@ -54,24 +64,10 @@ class Puzzle : BasePuzzle() {
                 for ((cloud, times, charge) in charges) {
                     merge(newCharges, cloud.zap(times, charge))
                 }
-                charges = newCharges
-            }
-            return clouds.sumOf { it.energy }
-        }
-        // Part 3
-        val threshold = if (input.size < 100) { 100L } else { 1_000_000L }
-        val results = mutableMapOf<Cloud, Long>()
-        for (maxCloud in clouds) {
-            clouds.forEach { it.reset() }
-            var charges = mutableListOf<Triple<Cloud, Long, Long>>()
-            charges.add(Triple(maxCloud, 1, 10))
-            while (charges.isNotEmpty()) {
-                val newCharges = mutableListOf<Triple<Cloud, Long, Long>>()
-                for ((cloud, times, charge) in charges) {
-                    merge(newCharges, cloud.zap(times, charge))
-                }
-                for (cloud in clouds) {
-                    merge(newCharges, cloud.explode(threshold))
+                if (part.isThree()) {
+                    for (cloud in clouds) {
+                        merge(newCharges, cloud.explode(threshold))
+                    }
                 }
                 charges = newCharges
             }
