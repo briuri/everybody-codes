@@ -19,9 +19,11 @@ fun main() {
             targetDirectory.mkdirs()
             val inputPath = File(targetDirectory, "$quest-$part-0.txt")
             Files.copy(file.toPath(), inputPath.toPath(), StandardCopyOption.REPLACE_EXISTING)
-            val examplePath = File(targetDirectory, "$quest-$part-1.txt")
-            examplePath.createNewFile()
-            println("Moving ${file.name} to ${inputPath.path}")
+            println("Copying ${file.name} to ${inputPath.path}")
+            File(targetDirectory, "$quest-1-1.txt").createNewFile()
+            File(targetDirectory, "$quest-2-1.txt").createNewFile()
+            File(targetDirectory, "$quest-3-1.txt").createNewFile()
+            
         }
     }
 }
