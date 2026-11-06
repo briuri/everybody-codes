@@ -55,7 +55,7 @@ class Puzzle : BasePuzzle() {
         var time = 1
         map[1] = 1
         // Slot 0 stores the split points.
-        while (map.getLimitCondition(part, time, growth) < limit) {
+        while (map.getLimitCondition(part) < limit) {
             time++
             // Grow each kind of branch 1 bigger
             for (i in growth downTo 2) {
@@ -75,7 +75,7 @@ class Puzzle : BasePuzzle() {
         return time
     }
 
-    fun Map<Int, Int>.getLimitCondition(part: Part, time: Int, growth: Int): Int {
+    fun Map<Int, Int>.getLimitCondition(part: Part): Int {
         if (part.isOne()) {
             return (this[0]!! + this.map { it.key * it.value }.sum())
         }
