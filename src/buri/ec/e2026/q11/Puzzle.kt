@@ -55,7 +55,10 @@ class Puzzle : BasePuzzle() {
                 portals.add(Pair(i, next))
             }
         }
+        // Generate initial strain
         val strain = getStrain(portals)
+        
+        // Add fixed portals
         for (line in input.drop(2)) {
             val numbers = line.extractInts()
             portals.add(Pair(numbers[0], numbers[1]))
@@ -65,31 +68,30 @@ class Puzzle : BasePuzzle() {
         if (part.isOne()) {
             return strain - getStrain(portals)
         }
+
+        // Set up the possible new portals between crystals.
+        val slices = mutableSetOf<List<Int>>()
         if (part.isTwo()) {
-            var minStrain = Int.MAX_VALUE
             for (crystal1 in 1..numPortals) {
                 for (crystal2 in 1..numPortals) {
-                    portals.clear()
-                    portals.addAll(originalPortals)
-                    portals.add(Pair(crystal1, crystal2))
-                    minStrain = min(minStrain, getStrain(portals))
+                    slices.add(listOf(crystal1, crystal2))
                 }
             }
-            return strain - minStrain
         }
-        // Part 3
-        val spacing = numPortals / 8
-        val slices = mutableSetOf<List<Int>>()
-        for (i in 1..spacing + 1) {
-            val list = mutableListOf<Int>()
-            var next = i
-            while (next <= numPortals) {
-                list.add(next)
-                next += spacing
+        else {
+            val spacing = numPortals / 8
+            for (i in 1..spacing + 1) {
+                val list = mutableListOf<Int>()
+                var next = i
+                while (next <= numPortals) {
+                    list.add(next)
+                    next += spacing
+                }
+                slices.add(list)
             }
-            slices.add(list)
         }
-
+        
+        // Iterate through the possible connections to find the best strain.
         var minStrain = Int.MAX_VALUE
         for (slice in slices) {
             for (pairing in generatePortalPairs(slice)) {
