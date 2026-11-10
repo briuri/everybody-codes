@@ -59,27 +59,25 @@ class Puzzle : BasePuzzle() {
         val visited = mutableMapOf<String, Pair<Long, List<Snapshot>>>()
         while (true) {
             // Handle cycle detection
-            if (part.isThree()) {
-                if (ghosts.toString() in visited.keys) {
-                    val (firstCycle, snapshots) = visited[ghosts.toString()]!!
+            if (ghosts.toString() in visited.keys) {
+                val (firstCycle, snapshots) = visited[ghosts.toString()]!!
 
-                    // Find the number of repeats that won't cross any thresholds.
-                    val ghostStates = mutableMapOf<Ghost, Pair<Long, Long>>()
-                    for (ghost in ghosts) {
-                        val change = ghost.collisions - snapshots.first { it.id == ghost.id }.collisions
-                        val remaining = threshold - ghost.collisions
-                        ghostStates[ghost] = Pair(change, remaining)
-                    }
-                    val repeats = ghostStates.values.minOfOrNull { (it.second - 1) / it.first }!!
-
-                    for (ghost in ghostStates.keys) {
-                        ghost.collisions += ghostStates[ghost]!!.first * repeats
-                    }
-                    val cycleLength = round - firstCycle
-                    round += cycleLength * repeats
+                // Find the number of repeats that won't cross any thresholds.
+                val ghostStates = mutableMapOf<Ghost, Pair<Long, Long>>()
+                for (ghost in ghosts) {
+                    val change = ghost.collisions - snapshots.first { it.id == ghost.id }.collisions
+                    val remaining = threshold - ghost.collisions
+                    ghostStates[ghost] = Pair(change, remaining)
                 }
-                visited[ghosts.toString()] = Pair(round, ghosts.map { it.toSnapshot() })
+                val repeats = ghostStates.values.minOfOrNull { (it.second - 1) / it.first }!!
+
+                for (ghost in ghostStates.keys) {
+                    ghost.collisions += ghostStates[ghost]!!.first * repeats
+                }
+                val cycleLength = round - firstCycle
+                round += cycleLength * repeats
             }
+            visited[ghosts.toString()] = Pair(round, ghosts.map { it.toSnapshot() })
 
             // Move ghosts
             ghosts.handleWallCollisions(walls)
