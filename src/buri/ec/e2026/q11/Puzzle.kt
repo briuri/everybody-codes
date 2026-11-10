@@ -80,7 +80,7 @@ class Puzzle : BasePuzzle() {
         }
         else {
             val spacing = numPortals / 8
-            for (i in 1..spacing + 1) {
+            for (i in 1..spacing) {
                 val list = mutableListOf<Int>()
                 var next = i
                 while (next <= numPortals) {
