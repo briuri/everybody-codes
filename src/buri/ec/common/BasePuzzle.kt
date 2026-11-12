@@ -6,6 +6,7 @@ import java.awt.datatransfer.StringSelection
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
+import kotlin.math.abs
 
 /**
  * Base class with shared functionality for all puzzles
@@ -146,4 +147,25 @@ fun String.extractLongs(allowNegative: Boolean = true): List<Long> {
 
 fun String.extractInts(allowNegative: Boolean = true): List<Int> {
     return this.extractLongs(allowNegative).map { it.toInt() }
+}
+
+/**
+ * Finds the greatest common denominator
+ */
+fun gcd(a: Int, b: Int): Int {
+    return if (b == 0) {
+        a
+    } else {
+        gcd(b, a % b)
+    }
+}
+
+/**
+ * Finds the least common multiple
+ */
+fun lcm(a: Int, b: Int): Int {
+    if (a == 0 || b == 0) {
+        return 0
+    }
+    return abs(a * b) / gcd(a, b)
 }
