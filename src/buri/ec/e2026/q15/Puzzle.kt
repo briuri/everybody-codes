@@ -56,7 +56,7 @@ class Puzzle : BasePuzzle() {
                 isBeforeChokepoint = true
             }
             if (start !in sulphurRuns.map { it.end } && grid[oneNorth] != '#') {
-                val runN = grid.getSuplhurRun(start, true)
+                val runN = grid.getSulphurRuns(start, true)
                 if (runN != null) {
                     sulphurRuns.add(runN)
                     if (isBeforeChokepoint) {
@@ -64,7 +64,7 @@ class Puzzle : BasePuzzle() {
                         isBeforeChokepoint = false
                     }
                 }
-                val runS = grid.getSuplhurRun(start, false)
+                val runS = grid.getSulphurRuns(start, false)
                 if (runS != null) {
                     sulphurRuns.add(runS)
                     if (isBeforeChokepoint) {
@@ -77,87 +77,120 @@ class Puzzle : BasePuzzle() {
         chokepoints.add(gridEnd.x)
 
         if (part.isOne()) {
-            var minSteps = 0L
-            // Calculate the min steps between chokepoints.
-            for (i in 0..<chokepoints.lastIndex) {
-                val chunkStart = Point2D(chokepoints[i], middleY)
-                val chunkEnd = Point2D(chokepoints[i + 1], middleY)
-                val chunkRuns =
-                    sulphurRuns.filter { it.start.x > chokepoints[i] && it.end.x < chokepoints[i + 1] }.toSet()
-
-                var minChunkSteps = Long.MAX_VALUE
-                for (path in getAllPaths(chunkRuns, chunkStart, chunkEnd)) {
-                    var pathSteps = 0L
-                    for (j in 0..<path.lastIndex) {
-                        val run = sulphurRuns.firstOrNull { it.matches(path[j], path[j + 1]) }
-                        pathSteps += run?.steps ?: abs(path[j + 1].x - path[j].x).toLong()
-                    }
-                    minChunkSteps = min(minChunkSteps, pathSteps)
-                }
-                minSteps += minChunkSteps
-            }
-            return minSteps
+            return getMinSteps(sulphurRuns, chokepoints, middleY)
         }
         if (part.isTwo()) {
-            val sulphurSoFar = mutableMapOf<Long, Long>()
-            // Post-run optimization: Ignore the poorest runs.
-            val bestRuns = sulphurRuns.sortedByDescending { it.value }.dropLast(sulphurRuns.size / 2)
-            var bestStepsToEnd = Long.MAX_VALUE
-            val sulphurTarget = 2026
-            val frontier = ArrayDeque<State>()
-            frontier.add(State(gridStart, Direction.WEST, 0, 0))
+            return getBestSteps(sulphurRuns, gridStart, gridEnd)
+        }
+        return getCycledSteps(sulphurRuns, gridStart, gridEnd)
+    }
 
-            while (frontier.isNotEmpty()) {
-                val current = frontier.removeFirst()
-                if (current.pos == gridEnd) {
-                    bestStepsToEnd = min(bestStepsToEnd, current.steps)
-                }
-                if (sulphurSoFar[current.steps] == null || sulphurSoFar[current.steps]!! < current.sulphur) {
-                    sulphurSoFar[current.steps] = current.sulphur
-                    if (current.sulphur >= sulphurTarget) {
-                        if (current.pos != gridEnd) {
-                            val toEnd = abs(current.pos.x - gridEnd.x)
-                            val endState = State(gridEnd, Direction.WEST, current.steps + toEnd, current.sulphur)
-                            frontier.add(endState)
+    fun getCycledSteps(sulphurRuns: Set<buri.ec.e2026.q15.SulphurRun>, gridStart: Point2D<Int>, gridEnd: Point2D<Int>): Long {
+        return -1
+    }
+    
+    // Part 2: Find the shortest path that gets at least 2026 sulphur.
+    fun getBestSteps(sulphurRuns: Set<SulphurRun>, gridStart: Point2D<Int>, gridEnd: Point2D<Int>): Long {
+        val sulphurSoFar = mutableMapOf<Long, Long>()
+        // Post-run optimization: Ignore the poorest runs.
+        val bestRuns = sulphurRuns.sortedByDescending { it.value }.take(6)
+        var bestStepsToEnd = Long.MAX_VALUE
+        val sulphurTarget = 2026
+        val frontier = ArrayDeque<State>()
+        frontier.add(State(gridStart, Direction.WEST, 0, 0))
+
+        while (frontier.isNotEmpty()) {
+            val current = frontier.removeFirst()
+            if (current.pos == gridEnd) {
+                bestStepsToEnd = min(bestStepsToEnd, current.steps)
+            }
+            if (sulphurSoFar[current.steps] == null || sulphurSoFar[current.steps]!! < current.sulphur) {
+                sulphurSoFar[current.steps] = current.sulphur
+                if (current.sulphur >= sulphurTarget) {
+                    if (current.pos != gridEnd) {
+                        val toEnd = abs(current.pos.x - gridEnd.x)
+                        val endState = State(gridEnd, Direction.WEST, current.steps + toEnd, current.sulphur)
+                        frontier.add(endState)
+                    }
+                } else {
+                    for (run in bestRuns) {
+                        val toRunStart = abs(current.pos.x - run.start.x)
+                        var cantTurnAround = (toRunStart == 0 && current.cameFrom == run.cameFrom)
+                        if (!cantTurnAround) {
+                            val byStartState =
+                                State(
+                                    run.end,
+                                    run.cameFrom,
+                                    current.steps + toRunStart + run.steps,
+                                    current.sulphur + run.sulphur
+                                )
+                            frontier.add(byStartState)
                         }
-                    } else {
-                        for (run in bestRuns) {
-                            val toRunStart = abs(current.pos.x - run.start.x)
-                            var cantTurnAround = (toRunStart == 0 && current.cameFrom == run.cameFrom)
-                            if (!cantTurnAround) {
-                                val byStartState =
-                                    State(
-                                        run.end,
-                                        run.cameFrom,
-                                        current.steps + toRunStart + run.steps,
-                                        current.sulphur + run.sulphur
-                                    )
-                                frontier.add(byStartState)
-                            }
 
-                            val toRunEnd = abs(current.pos.x - run.end.x)
-                            cantTurnAround = (toRunEnd == 0 && current.cameFrom == run.cameFrom)
-                            if (!cantTurnAround) {
-                                val byEndState =
-                                    State(
-                                        run.start,
-                                        run.cameFrom,
-                                        current.steps + toRunEnd + run.steps,
-                                        current.sulphur + run.sulphur
-                                    )
-                                frontier.add(byEndState)
-                            }
+                        val toRunEnd = abs(current.pos.x - run.end.x)
+                        cantTurnAround = (toRunEnd == 0 && current.cameFrom == run.cameFrom)
+                        if (!cantTurnAround) {
+                            val byEndState =
+                                State(
+                                    run.start,
+                                    run.cameFrom,
+                                    current.steps + toRunEnd + run.steps,
+                                    current.sulphur + run.sulphur
+                                )
+                            frontier.add(byEndState)
                         }
                     }
                 }
             }
-            return bestStepsToEnd
         }
-        // Part 3
-        return -1
+        return bestStepsToEnd
+    }
+    
+    // Part 1: Find the shortest path that gets all the sulphur.
+    fun getMinSteps(sulphurRuns: Set<SulphurRun>, chokepoints: List<Int>, middleY: Int): Long {
+        var minSteps = 0L
+        // Calculate the min steps between chokepoints.
+        for (i in 0..<chokepoints.lastIndex) {
+            val chunkStart = Point2D(chokepoints[i], middleY)
+            val chunkEnd = Point2D(chokepoints[i + 1], middleY)
+            val chunkRuns =
+                sulphurRuns.filter { it.start.x > chokepoints[i] && it.end.x < chokepoints[i + 1] }.toSet()
+
+            var minChunkSteps = Long.MAX_VALUE
+            for (path in getPossiblePaths(chunkRuns, chunkStart, chunkEnd)) {
+                var pathSteps = 0L
+                for (j in 0..<path.lastIndex) {
+                    val run = sulphurRuns.firstOrNull { it.matches(path[j], path[j + 1]) }
+                    pathSteps += run?.steps ?: abs(path[j + 1].x - path[j].x).toLong()
+                }
+                minChunkSteps = min(minChunkSteps, pathSteps)
+            }
+            minSteps += minChunkSteps
+        }
+        return minSteps
     }
 
-    fun Grid<Char>.getSuplhurRun(pos: Point2D<Int>, toNorth: Boolean): SulphurRun? {
+    // Part 1: Recursively get possible paths.
+    fun getPossiblePaths(requiredRuns: Set<SulphurRun>, start: Point2D<Int>, end: Point2D<Int>): List<List<Point2D<Int>>> {
+        if (requiredRuns.isEmpty()) {
+            return listOf(listOf(start, end))
+        }
+        val paths = mutableListOf<List<Point2D<Int>>>()
+        for (run in requiredRuns) {
+            val toRunStart = listOf(start, run.start)
+            val toRunEnd = listOf(start, run.end)
+            for (path in getPossiblePaths(requiredRuns - run, run.end, end)) {
+                paths.add(toRunStart + path)
+            }
+            for (path in getPossiblePaths(requiredRuns - run, run.start, end)) {
+                paths.add(toRunEnd + path)
+            }
+        }
+        return paths
+    }
+    
+    // Convert the sulphur passages into edges with costs.
+    fun Grid<Char>.getSulphurRuns(pos: Point2D<Int>, toNorth: Boolean): SulphurRun? {
         var sulphur = 0L
         var steps = 1L
         var dx = 0
@@ -192,24 +225,6 @@ class Puzzle : BasePuzzle() {
         } else {
             null
         }
-    }
-
-    fun getAllPaths(requiredRuns: Set<SulphurRun>, start: Point2D<Int>, end: Point2D<Int>): List<List<Point2D<Int>>> {
-        if (requiredRuns.isEmpty()) {
-            return listOf(listOf(start, end))
-        }
-        val paths = mutableListOf<List<Point2D<Int>>>()
-        for (run in requiredRuns) {
-            val toRunStart = listOf(start, run.start)
-            val toRunEnd = listOf(start, run.end)
-            for (path in getAllPaths(requiredRuns - run, run.end, end)) {
-                paths.add(toRunStart + path)
-            }
-            for (path in getAllPaths(requiredRuns - run, run.start, end)) {
-                paths.add(toRunEnd + path)
-            }
-        }
-        return paths
     }
 }
 
