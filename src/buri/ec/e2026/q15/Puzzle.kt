@@ -31,7 +31,7 @@ class Puzzle : BasePuzzle() {
     @Test
     fun runPart3() {
         assertRun(540320698784, 1)
-        assertRun(0, 0, true)
+        assertRun(265502412359, 0, true)
     }
 
     /**
@@ -85,7 +85,8 @@ class Puzzle : BasePuzzle() {
         return getCycledSteps(sulphurRuns, gridStart, gridEnd)
     }
 
-    fun getCycledSteps(sulphurRuns: Set<buri.ec.e2026.q15.SulphurRun>, gridStart: Point2D<Int>, gridEnd: Point2D<Int>): Long {
+    // Part 3: Find the path with cycles that will get exactly 202620262026 sulphur.
+    fun getCycledSteps(sulphurRuns: Set<SulphurRun>, gridStart: Point2D<Int>, gridEnd: Point2D<Int>): Long {
         return -1
     }
     
