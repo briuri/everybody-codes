@@ -77,7 +77,7 @@ class Puzzle : BasePuzzle() {
         chokepoints.add(gridEnd.x)
 
         if (part.isOne()) {
-            var minSteps = 0
+            var minSteps = 0L
             // Calculate the min steps between chokepoints.
             for (i in 0..<chokepoints.lastIndex) {
                 val chunkStart = Point2D(chokepoints[i], middleY)
@@ -85,12 +85,12 @@ class Puzzle : BasePuzzle() {
                 val chunkRuns =
                     sulphurRuns.filter { it.start.x > chokepoints[i] && it.end.x < chokepoints[i + 1] }.toSet()
 
-                var minChunkSteps = Int.MAX_VALUE
+                var minChunkSteps = Long.MAX_VALUE
                 for (path in getAllPaths(chunkRuns, chunkStart, chunkEnd)) {
-                    var pathSteps = 0
+                    var pathSteps = 0L
                     for (j in 0..<path.lastIndex) {
                         val run = sulphurRuns.firstOrNull { it.matches(path[j], path[j + 1]) }
-                        pathSteps += run?.steps ?: abs(path[j + 1].x - path[j].x)
+                        pathSteps += run?.steps ?: abs(path[j + 1].x - path[j].x).toLong()
                     }
                     minChunkSteps = min(minChunkSteps, pathSteps)
                 }
@@ -99,8 +99,10 @@ class Puzzle : BasePuzzle() {
             return minSteps
         }
         if (part.isTwo()) {
-            val sulphurSoFar = mutableMapOf<Int, Int>()
-            var bestStepsToEnd = Int.MAX_VALUE
+            val sulphurSoFar = mutableMapOf<Long, Long>()
+            // Post-run optimization: Ignore the poorest runs.
+            val bestRuns = sulphurRuns.sortedByDescending { it.value }.dropLast(sulphurRuns.size / 2)
+            var bestStepsToEnd = Long.MAX_VALUE
             val sulphurTarget = 2026
             val frontier = ArrayDeque<State>()
             frontier.add(State(gridStart, Direction.WEST, 0, 0))
@@ -119,7 +121,7 @@ class Puzzle : BasePuzzle() {
                             frontier.add(endState)
                         }
                     } else {
-                        for (run in sulphurRuns) {
+                        for (run in bestRuns) {
                             val toRunStart = abs(current.pos.x - run.start.x)
                             var cantTurnAround = (toRunStart == 0 && current.cameFrom == run.cameFrom)
                             if (!cantTurnAround) {
@@ -156,8 +158,8 @@ class Puzzle : BasePuzzle() {
     }
 
     fun Grid<Char>.getSuplhurRun(pos: Point2D<Int>, toNorth: Boolean): SulphurRun? {
-        var sulphur = 0
-        var steps = 1
+        var sulphur = 0L
+        var steps = 1L
         var dx = 0
         var dy = if (toNorth) {
             -1
@@ -215,20 +217,21 @@ data class SulphurRun(
     val start: Point2D<Int>,
     val end: Point2D<Int>,
     val isNorth: Boolean,
-    val steps: Int,
-    val sulphur: Int
+    val steps: Long,
+    val sulphur: Long
 ) {
-    override fun toString() = "[$start-$end $isNorth $steps $sulphur]"
-
-    fun matches(testStart: Point2D<Int>, testEnd: Point2D<Int>): Boolean {
-        return (start == testStart && end == testEnd) || (end == testStart && start == testEnd)
-    }
-
+    val value = (sulphur * 1.0) / steps
     val cameFrom = if (isNorth) {
         Direction.NORTH
     } else {
         Direction.SOUTH
     }
+
+    override fun toString() = "[$start-$end $isNorth $steps $sulphur ($value)]"
+
+    fun matches(testStart: Point2D<Int>, testEnd: Point2D<Int>): Boolean {
+        return (start == testStart && end == testEnd) || (end == testStart && start == testEnd)
+    }
 }
 
-data class State(val pos: Point2D<Int>, val cameFrom: Direction, val steps: Int, val sulphur: Int)
+data class State(val pos: Point2D<Int>, val cameFrom: Direction, val steps: Long, val sulphur: Long)
