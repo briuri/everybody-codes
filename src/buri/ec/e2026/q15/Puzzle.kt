@@ -6,8 +6,11 @@ import buri.ec.common.position.Direction
 import buri.ec.common.position.Grid
 import buri.ec.common.position.Point2D
 import org.junit.Test
-import kotlin.math.abs
+import java.util.SortedMap
+import kotlin.collections.ArrayDeque
+import kotlin.collections.sortBy
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 /**
  * Entry point for a daily puzzle
@@ -38,216 +41,238 @@ class Puzzle : BasePuzzle() {
      * Executes a part of the puzzle using the specified input.
      */
     override fun run(part: Part, input: List<String>): Number {
-        val grid = Grid.fromCharInput(input)
-        val gridStart = grid.filter { it == 'S' }.first()
-        val gridEnd = grid.filter { it == 'E' }.first()
-        val middleY = gridStart.y
-
-        // Reduce the runs for sulphur down to a start, end, and number of steps.
-        // Find the points where the maze narrows to a single passable block, to reduce the number of runs to consider at the same point.
-        var isBeforeChokepoint = true
-        val chokepoints = mutableListOf<Int>()
-        chokepoints.add(gridStart.x)
-        val sulphurRuns = mutableSetOf<SulphurRun>()
-        for (x in gridStart.x + 1..<gridEnd.x) {
-            val start = Point2D(x, middleY)
-            val oneNorth = Point2D(x, middleY - 1)
-            if (!isBeforeChokepoint && chokepoints.isNotEmpty() && start.x > chokepoints.last()) {
-                isBeforeChokepoint = true
-            }
-            if (start !in sulphurRuns.map { it.end } && grid[oneNorth] != '#') {
-                val runN = grid.getSulphurRuns(start, true)
-                if (runN != null) {
-                    sulphurRuns.add(runN)
-                    if (isBeforeChokepoint) {
-                        chokepoints.add(runN.end.x + 1)
-                        isBeforeChokepoint = false
-                    }
-                }
-                val runS = grid.getSulphurRuns(start, false)
-                if (runS != null) {
-                    sulphurRuns.add(runS)
-                    if (isBeforeChokepoint) {
-                        chokepoints.add(runS.end.x + 1)
-                        isBeforeChokepoint = false
-                    }
-                }
-            }
-        }
-        chokepoints.add(gridEnd.x)
-
+        val graph = Graph.fromCharInput(input)
+        println(graph)
         if (part.isOne()) {
-            return getMinSteps(sulphurRuns, chokepoints, middleY)
+            return graph.getMinStepsAllOre()
         }
         if (part.isTwo()) {
-            return getBestSteps(sulphurRuns, gridStart, gridEnd)
+            return -1
         }
-        return getCycledSteps(sulphurRuns, gridStart, gridEnd)
-    }
-
-    // Part 3: Find the path with cycles that will get exactly 202620262026 sulphur.
-    fun getCycledSteps(sulphurRuns: Set<SulphurRun>, gridStart: Point2D<Int>, gridEnd: Point2D<Int>): Long {
+        // Part 3
         return -1
     }
-    
-    // Part 2: Find the shortest path that gets at least 2026 sulphur.
-    fun getBestSteps(sulphurRuns: Set<SulphurRun>, gridStart: Point2D<Int>, gridEnd: Point2D<Int>): Long {
-        val sulphurSoFar = mutableMapOf<Long, Long>()
-        // Post-run optimization: Ignore the poorest runs.
-        val bestRuns = sulphurRuns.sortedByDescending { it.value }.take(6)
-        var bestStepsToEnd = Long.MAX_VALUE
-        val sulphurTarget = 2026
-        val frontier = ArrayDeque<State>()
-        frontier.add(State(gridStart, Direction.WEST, 0, 0))
+}
 
+class Graph(val start: Int, val end: Int, edges: Set<Edge>) {
+    val edgeMap = sortedMapOf<Int, MutableSet<Edge>>()
+    val edgeMapNoLoops: SortedMap<Int, MutableSet<Edge>>
+
+    init {
+        for (edge in edges) {
+            edgeMap.putIfAbsent(edge.start, mutableSetOf())
+            edgeMap[edge.start]!!.add(edge)
+        }
+        edgeMapNoLoops = edgeMap.toSortedMap()
+        for ((_, value) in edgeMapNoLoops) {
+            value.removeAll { it.start == it.end }
+        }
+    }
+
+    override fun toString() = edgeMap.entries.joinToString("\n")
+
+    fun getMinStepsAllOre(): Int {
+        val totalUniqueOre = uniqueOre.values.flatten().size
+        var minSteps = Int.MAX_VALUE
+        val soFar = mutableMapOf<Pair<Int, Direction>, Pair<Int, Int>>()
+        val frontier = ArrayDeque<State1>()
+        frontier.add(State1(start, Direction.EAST, 0, mutableSetOf()))
         while (frontier.isNotEmpty()) {
             val current = frontier.removeFirst()
-            if (current.pos == gridEnd) {
-                bestStepsToEnd = min(bestStepsToEnd, current.steps)
+            val key = Pair(current.x, current.facing)
+            if (key in soFar.keys) {
+                val previous = soFar[key]!!
+                if (previous.first <= current.steps && previous.second >= current.ore.size) {
+                    continue
+                }
             }
-            if (sulphurSoFar[current.steps] == null || sulphurSoFar[current.steps]!! < current.sulphur) {
-                sulphurSoFar[current.steps] = current.sulphur
-                if (current.sulphur >= sulphurTarget) {
-                    if (current.pos != gridEnd) {
-                        val toEnd = abs(current.pos.x - gridEnd.x)
-                        val endState = State(gridEnd, Direction.WEST, current.steps + toEnd, current.sulphur)
-                        frontier.add(endState)
-                    }
-                } else {
-                    for (run in bestRuns) {
-                        val toRunStart = abs(current.pos.x - run.start.x)
-                        var cantTurnAround = (toRunStart == 0 && current.cameFrom == run.cameFrom)
-                        if (!cantTurnAround) {
-                            val byStartState =
-                                State(
-                                    run.end,
-                                    run.cameFrom,
-                                    current.steps + toRunStart + run.steps,
-                                    current.sulphur + run.sulphur
-                                )
-                            frontier.add(byStartState)
-                        }
+            soFar[key] = Pair(current.steps, current.ore.size)
 
-                        val toRunEnd = abs(current.pos.x - run.end.x)
-                        cantTurnAround = (toRunEnd == 0 && current.cameFrom == run.cameFrom)
-                        if (!cantTurnAround) {
-                            val byEndState =
-                                State(
-                                    run.start,
-                                    run.cameFrom,
-                                    current.steps + toRunEnd + run.steps,
-                                    current.sulphur + run.sulphur
-                                )
-                            frontier.add(byEndState)
-                        }
+            if (current.x == end) {
+                if (current.ore.size == totalUniqueOre) {
+                    minSteps = min(minSteps, current.steps)
+                    frontier.removeAll { it.steps > minSteps }
+                }
+                continue
+            }
+
+            val nexts = mutableSetOf<State1>()
+            for (edge in edgeMapNoLoops[current.x]!!.filter { it.ore > 0 && it.canEnter(current.facing) }) {
+                if (current.ore.size < totalUniqueOre) {
+                    val testOre = if (edge in uniqueOre.keys) {
+                        uniqueOre[edge]!!
+                    } else {
+                        uniqueOre[edge.reverse()]!!
+                    }
+                    if (testOre.none { it in current.ore }) {
+                        val newOre = current.ore.toMutableSet()
+                        newOre.addAll(testOre)
+                        nexts.add(State1(edge.end, edge.endFacing, current.steps + edge.steps, newOre))
                     }
                 }
             }
-        }
-        return bestStepsToEnd
-    }
-    
-    // Part 1: Find the shortest path that gets all the sulphur.
-    fun getMinSteps(sulphurRuns: Set<SulphurRun>, chokepoints: List<Int>, middleY: Int): Long {
-        var minSteps = 0L
-        // Calculate the min steps between chokepoints.
-        for (i in 0..<chokepoints.lastIndex) {
-            val chunkStart = Point2D(chokepoints[i], middleY)
-            val chunkEnd = Point2D(chokepoints[i + 1], middleY)
-            val chunkRuns =
-                sulphurRuns.filter { it.start.x > chokepoints[i] && it.end.x < chokepoints[i + 1] }.toSet()
-
-            var minChunkSteps = Long.MAX_VALUE
-            for (path in getPossiblePaths(chunkRuns, chunkStart, chunkEnd)) {
-                var pathSteps = 0L
-                for (j in 0..<path.lastIndex) {
-                    val run = sulphurRuns.firstOrNull { it.matches(path[j], path[j + 1]) }
-                    pathSteps += run?.steps ?: abs(path[j + 1].x - path[j].x).toLong()
+            // Only move if there are no available ore runs.
+            if (nexts.isEmpty()) {
+                for (edge in edgeMapNoLoops[current.x]!!.filter { it.ore == 0 && it.canEnter(current.facing) }) {
+                    nexts.add(State1(edge.end, edge.endFacing, current.steps + edge.steps, current.ore))
                 }
-                minChunkSteps = min(minChunkSteps, pathSteps)
             }
-            minSteps += minChunkSteps
+            frontier.addAll(nexts)
+            frontier.sortBy { it.x }
         }
         return minSteps
     }
 
-    // Part 1: Recursively get possible paths.
-    fun getPossiblePaths(requiredRuns: Set<SulphurRun>, start: Point2D<Int>, end: Point2D<Int>): List<List<Point2D<Int>>> {
-        if (requiredRuns.isEmpty()) {
-            return listOf(listOf(start, end))
-        }
-        val paths = mutableListOf<List<Point2D<Int>>>()
-        for (run in requiredRuns) {
-            val toRunStart = listOf(start, run.start)
-            val toRunEnd = listOf(start, run.end)
-            for (path in getPossiblePaths(requiredRuns - run, run.end, end)) {
-                paths.add(toRunStart + path)
-            }
-            for (path in getPossiblePaths(requiredRuns - run, run.start, end)) {
-                paths.add(toRunEnd + path)
-            }
-        }
-        return paths
-    }
-    
-    // Convert the sulphur passages into edges with costs.
-    fun Grid<Char>.getSulphurRuns(pos: Point2D<Int>, toNorth: Boolean): SulphurRun? {
-        var sulphur = 0L
-        var steps = 1L
-        var dx = 0
-        var dy = if (toNorth) {
-            -1
-        } else {
-            1
-        }
-        var current = Point2D(pos.x, pos.y + dy)
-        while (current.y != pos.y) {
-            if (this[current] == '@') {
-                sulphur++
-            }
-            if (this[current.x + dx, current.y + dy] == '#') {
-                if (dx == 0) {
-                    dx = 1
-                    dy = 0
-                } else {
-                    dx = 0
-                    dy = if (toNorth) {
-                        1
-                    } else {
-                        -1
+    companion object {
+        val uniqueOre = mutableMapOf<Edge, Set<Point2D<Int>>>()
+
+        fun fromCharInput(input: List<String>): Graph {
+            uniqueOre.clear()
+            val grid = Grid.fromCharInput(input)
+            val start = grid.filter { it == 'S' }.first().x
+            val end = grid.filter { it == 'E' }.last().x
+            val y = grid.filter { it == 'S' }.first().y
+            val crossroads = ((start + 1)..<end).filter { grid[it, y - 1] != '#' }
+
+            val edges = mutableSetOf<Edge>()
+            // One-way east from start
+            edges.add(Edge(start, Direction.EAST, crossroads[0], crossroads[0] - start, 0))
+            for (i in crossroads.indices) {
+                val x = crossroads[i]
+                if (i != crossroads.lastIndex) {
+                    val east = Edge(x, Direction.EAST, crossroads[i + 1], crossroads[i + 1] - x, 0)
+                    edges.add(east)
+                    if (i != 0) {
+                        edges.add(east.reverse())
+                    }
+                }
+                // Don't recompute ore runs in reverse
+                if (edges.none { it.end == x && it.ore > 0 }) {
+                    val runStart = Point2D(x, y)
+                    val north = getOreRun(grid, runStart, true)
+                    if (north != null) {
+                        edges.add(north)
+                        edges.add(north.reverse())
+                    }
+                    val south = getOreRun(grid, runStart, false)
+                    if (south != null) {
+                        edges.add(south)
+                        edges.add(south.reverse())
+                    }
+                    if (north != null && south != null) {
+                        val loop = Edge(
+                            north.start,
+                            north.startFacing,
+                            north.start,
+                            north.steps + south.steps,
+                            north.ore + south.ore
+                        )
+                        edges.add(loop)
+                        edges.add(loop.reverse())
                     }
                 }
             }
-            current = Point2D(current.x + dx, current.y + dy)
-            steps++
+            // One-way east from last crossroads.
+            edges.add(Edge(crossroads.last(), Direction.EAST, end, (end - crossroads.last()), 0))
+            return Graph(start, end, edges)
         }
-        return if (sulphur > 0) {
-            SulphurRun(pos, current, toNorth, steps, sulphur)
-        } else {
-            null
+
+        fun getOreRun(grid: Grid<Char>, start: Point2D<Int>, isNorth: Boolean): Edge? {
+            val away = if (isNorth) {
+                Point2D(0, -1)
+            } else {
+                Point2D(0, 1)
+            }
+            val east = Point2D(1, 0)
+            val back = if (isNorth) {
+                Point2D(0, 1)
+            } else {
+                Point2D(0, -1)
+            }
+            val facing = if (isNorth) {
+                Direction.NORTH
+            } else {
+                Direction.SOUTH
+            }
+
+            var change = away
+            var steps = 0
+            val ore = mutableSetOf<Point2D<Int>>()
+            var pos = start
+            do {
+                val next = Point2D(pos.x + change.x, pos.y + change.y)
+                if (grid[next] == '#') {
+                    if (change == away) {
+                        change = east
+                    } else if (change == east) {
+                        change = back
+                    }
+                }
+                pos = Point2D(pos.x + change.x, pos.y + change.y)
+                if (grid[pos] == '@') {
+                    ore.add(pos)
+                }
+                steps++
+            } while (pos.y != start.y)
+            if (ore.isNotEmpty()) {
+                val edge = Edge(start.x, facing, pos.x, steps, ore.size)
+                uniqueOre[edge] = ore
+                return edge
+            }
+            return null
         }
     }
 }
 
-data class SulphurRun(
-    val start: Point2D<Int>,
-    val end: Point2D<Int>,
-    val isNorth: Boolean,
-    val steps: Long,
-    val sulphur: Long
-) {
-    val value = (sulphur * 1.0) / steps
-    val cameFrom = if (isNorth) {
-        Direction.NORTH
-    } else {
-        Direction.SOUTH
+data class Edge(val start: Int, val startFacing: Direction, val end: Int, val steps: Int, val ore: Int) {
+    val value = (ore * 100.0 / steps).roundToInt() / 100.0
+    val endFacing = when (startFacing) {
+        Direction.NORTH -> {
+            if (start == end) {
+                Direction.NORTH
+            } else {
+                Direction.SOUTH
+            }
+        }
+        Direction.SOUTH -> {
+            if (start == end) {
+                Direction.SOUTH
+            } else {
+                Direction.NORTH
+            }
+        }
+        else -> startFacing
     }
 
-    override fun toString() = "[$start-$end $isNorth $steps $sulphur ($value)]"
+    override fun toString() = "$start,$startFacing to $end,$endFacing steps=$steps ore=$ore ($value)"
 
-    fun matches(testStart: Point2D<Int>, testEnd: Point2D<Int>): Boolean {
-        return (start == testStart && end == testEnd) || (end == testStart && start == testEnd)
+    fun canEnter(cartFacing: Direction): Boolean {
+        return (startFacing.reverse() != cartFacing)
+    }
+
+    fun reverse(): Edge {
+        val newStartFacing = when (startFacing) {
+            Direction.NORTH -> {
+                if (start == end) {
+                    Direction.SOUTH
+                } else {
+                    Direction.NORTH
+                }
+            }
+            Direction.SOUTH -> {
+                if (start == end) {
+                    Direction.NORTH
+                } else {
+                    Direction.SOUTH
+                }
+            }
+            Direction.WEST -> Direction.EAST
+            else -> Direction.WEST
+        }
+        return Edge(end, newStartFacing, start, steps, ore)
     }
 }
 
-data class State(val pos: Point2D<Int>, val cameFrom: Direction, val steps: Long, val sulphur: Long)
+data class State1(val x: Int, val facing: Direction, val steps: Int, val ore: MutableSet<Point2D<Int>>) {
+    override fun toString() = "$x,$facing steps=$steps ore=$ore"
+}
