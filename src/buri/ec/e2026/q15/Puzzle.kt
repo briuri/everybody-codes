@@ -6,9 +6,6 @@ import buri.ec.common.position.Direction
 import buri.ec.common.position.Grid
 import buri.ec.common.position.Point2D
 import org.junit.Test
-import java.util.SortedMap
-import kotlin.collections.ArrayDeque
-import kotlin.collections.sortBy
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -42,35 +39,88 @@ class Puzzle : BasePuzzle() {
      */
     override fun run(part: Part, input: List<String>): Number {
         val graph = Graph.fromCharInput(input)
-        println(graph)
         if (part.isOne()) {
             return graph.getMinStepsAllOre()
         }
         if (part.isTwo()) {
-            return -1
+            return graph.getMinStepsAtLeastOre(2026)
         }
         // Part 3
         return -1
     }
 }
 
-class Graph(val start: Int, val end: Int, edges: Set<Edge>) {
-    val edgeMap = sortedMapOf<Int, MutableSet<Edge>>()
-    val edgeMapNoLoops: SortedMap<Int, MutableSet<Edge>>
+class Graph(val start: Int, val end: Int, rawEdges: Set<Edge>) {
+    val edges = sortedMapOf<Int, MutableSet<Edge>>()
+    val edgesNoLoops = sortedMapOf<Int, MutableSet<Edge>>()
+    val edgesHighValue = sortedMapOf<Int, MutableSet<Edge>>()
 
     init {
-        for (edge in edges) {
-            edgeMap.putIfAbsent(edge.start, mutableSetOf())
-            edgeMap[edge.start]!!.add(edge)
+        for (edge in rawEdges) {
+            edges.putIfAbsent(edge.start, mutableSetOf())
+            edges[edge.start]!!.add(edge)
         }
-        edgeMapNoLoops = edgeMap.toSortedMap()
-        for ((_, value) in edgeMapNoLoops) {
-            value.removeAll { it.start == it.end }
+
+        for ((key, values) in edges) {
+            edgesNoLoops[key] = mutableSetOf()
+            for (edge in values) {
+                if (edge.start != edge.end) {
+                    edgesNoLoops[key]!!.add(edge)
+                }
+            }
+        }
+
+        val values = edges.values.flatten().filter { it.ore > 0 }.map { it.value }.sorted()
+        val threshold = values[values.size / 2]
+        for ((key, values) in edges) {
+            edgesHighValue[key] = mutableSetOf()
+            for (edge in values) {
+                if (edge.ore == 0 || (edge.ore > 0 && edge.value >= threshold)) {
+                    edgesHighValue[key]!!.add(edge)
+                }
+            }
         }
     }
 
-    override fun toString() = edgeMap.entries.joinToString("\n")
+    // Part 2
+    fun getMinStepsAtLeastOre(oreTarget: Int): Int {
+        var minSteps = Int.MAX_VALUE
+        val soFar = mutableMapOf<Pair<Int, Direction>, Pair<Int, Int>>()
+        val frontier = ArrayDeque<State2>()
+        frontier.add(State2(start, Direction.EAST, 0, 0))
+        while (frontier.isNotEmpty()) {
+            val current = frontier.removeFirst()
+            val key = Pair(current.x, current.facing)
+            if (key in soFar.keys) {
+                val previous = soFar[key]!!
+                if (previous.first <= current.steps && previous.second >= current.ore) {
+                    continue
+                }
+            }
+            soFar[key] = Pair(current.steps, current.ore)
 
+            if (current.x == end) {
+                if (current.ore >= oreTarget) {
+                    minSteps = min(minSteps, current.steps)
+                    frontier.removeAll { it.steps > minSteps }
+                }
+                continue
+            }
+
+            if (current.ore < oreTarget) {
+                for (edge in edgesHighValue[current.x]!!.filter { it.ore > 0 && it.canEnter(current.facing) }) {
+                    frontier.add(State2(edge.end, edge.endFacing, current.steps + edge.steps, current.ore + edge.ore))
+                }
+            }
+            for (edge in edgesHighValue[current.x]!!.filter { it.ore == 0 && it.canEnter(current.facing) }) {
+                frontier.add(State2(edge.end, edge.endFacing, current.steps + edge.steps, current.ore))
+            }
+            frontier.sortBy { it.steps }
+        }
+        return minSteps
+    }
+
+    // Part 1
     fun getMinStepsAllOre(): Int {
         val totalUniqueOre = uniqueOre.values.flatten().size
         var minSteps = Int.MAX_VALUE
@@ -97,7 +147,7 @@ class Graph(val start: Int, val end: Int, edges: Set<Edge>) {
             }
 
             val nexts = mutableSetOf<State1>()
-            for (edge in edgeMapNoLoops[current.x]!!.filter { it.ore > 0 && it.canEnter(current.facing) }) {
+            for (edge in edgesNoLoops[current.x]!!.filter { it.ore > 0 && it.canEnter(current.facing) }) {
                 if (current.ore.size < totalUniqueOre) {
                     val testOre = if (edge in uniqueOre.keys) {
                         uniqueOre[edge]!!
@@ -113,7 +163,7 @@ class Graph(val start: Int, val end: Int, edges: Set<Edge>) {
             }
             // Only move if there are no available ore runs.
             if (nexts.isEmpty()) {
-                for (edge in edgeMapNoLoops[current.x]!!.filter { it.ore == 0 && it.canEnter(current.facing) }) {
+                for (edge in edgesNoLoops[current.x]!!.filter { it.ore == 0 && it.canEnter(current.facing) }) {
                     nexts.add(State1(edge.end, edge.endFacing, current.steps + edge.steps, current.ore))
                 }
             }
@@ -274,5 +324,9 @@ data class Edge(val start: Int, val startFacing: Direction, val end: Int, val st
 }
 
 data class State1(val x: Int, val facing: Direction, val steps: Int, val ore: MutableSet<Point2D<Int>>) {
+    override fun toString() = "$x,$facing steps=$steps ore=$ore"
+}
+
+data class State2(val x: Int, val facing: Direction, val steps: Int, val ore: Int) {
     override fun toString() = "$x,$facing steps=$steps ore=$ore"
 }
