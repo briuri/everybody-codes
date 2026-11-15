@@ -9,8 +9,6 @@ import buri.ec.common.position.Direction.*
  */
 data class MutablePosition(var coords: Point2D<Long>, var facing: Direction = NORTH) {
 
-    constructor(x: Long, y: Long, facing: Direction) : this(Point2D(x, y), facing)
-
     /**
      * Adjusts facing and moves in that direction.
      */
@@ -66,18 +64,22 @@ data class MutablePosition(var coords: Point2D<Long>, var facing: Direction = NO
      * Change the facing on this position
      */
     fun turnAround() {
-        facing = when (facing) {
-            NORTH -> SOUTH
-            EAST -> WEST
-            SOUTH -> NORTH
-            WEST -> EAST
-        }
+        facing = facing.reverse()
     }
 }
 
 enum class Direction(val icon: Char) {
     NORTH('^'), EAST('>'), SOUTH('v'), WEST('<');
 
+    fun reverse(): Direction {
+        return when (this) {
+            NORTH -> SOUTH
+            EAST -> WEST
+            SOUTH -> NORTH
+            WEST -> EAST
+        }
+    }
+    
     /**
      * Returns a direction matching the given icon.
      */
