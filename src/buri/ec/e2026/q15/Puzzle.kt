@@ -6,6 +6,7 @@ import buri.ec.common.position.Direction
 import buri.ec.common.position.Grid
 import buri.ec.common.position.Point2D
 import org.junit.Test
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -46,14 +47,13 @@ class Puzzle : BasePuzzle() {
             return graph.getMinStepsAtLeastOre(2026)
         }
         // Part 3
-        return -1
+        return graph.getMinStepsExactOre(202_620_262_026)
     }
 }
 
 class Graph(val start: Int, val end: Int, rawEdges: Set<Edge>) {
     val edges = sortedMapOf<Int, MutableSet<Edge>>()
     val edgesNoLoops = sortedMapOf<Int, MutableSet<Edge>>()
-    val edgesHighValue = sortedMapOf<Int, MutableSet<Edge>>()
 
     init {
         for (edge in rawEdges) {
@@ -69,25 +69,74 @@ class Graph(val start: Int, val end: Int, rawEdges: Set<Edge>) {
                 }
             }
         }
+    }
 
-        val values = edges.values.flatten().filter { it.ore > 0 }.map { it.value }.sorted()
-        val threshold = values[values.size / 2]
-        for ((key, values) in edges) {
-            edgesHighValue[key] = mutableSetOf()
-            for (edge in values) {
-                if (edge.ore == 0 || (edge.ore > 0 && edge.value >= threshold)) {
-                    edgesHighValue[key]!!.add(edge)
-                }
+    // Part 3
+    fun getMinStepsExactOre(oreTarget: Long): Long {
+        // Figure out the highest value loops (and half loops that connect down the tunnel).
+        // In the data, this is always in the first area before the first chokepoint.
+        val possibleEdges = mutableListOf<Edge>()
+        for (edge in edges.values.flatten().filter { it.ore > 0 }) {
+            if (edge.start == edge.end) {
+                possibleEdges.add(edge)
+            }
+            // Half loop
+            else {
+                val steps = edge.steps + abs(edge.end - edge.start)
+                val isReverse = edge.end < edge.start
+                possibleEdges.add(Edge(edge.start, edge.startFacing, edge.start, steps, edge.ore, true, isReverse))
             }
         }
+        val bestEdge = possibleEdges.maxByOrNull { it.value }!!
+
+        val safeTarget = oreTarget - (uniqueOre.size * 3)
+        val repeats = safeTarget / bestEdge.ore
+        val steps = (bestEdge.start - start) + (bestEdge.steps * repeats)
+        val ore = bestEdge.ore * repeats
+
+        // Now solve the rest normally (as in Part 2). Only difference: Exact ore needed, not at least.
+        var minSteps = Long.MAX_VALUE
+        val soFar = mutableMapOf<Pair<Int, Direction>, Pair<Long, Long>>()
+        val frontier = ArrayDeque<State23>()
+        frontier.add(State23(bestEdge.end, bestEdge.endFacing, steps, ore))
+        while (frontier.isNotEmpty()) {
+            val current = frontier.removeFirst()
+            val key = Pair(current.x, current.facing)
+            if (key in soFar.keys) {
+                val previous = soFar[key]!!
+                if (previous.first <= current.steps && previous.second >= current.ore) {
+                    continue
+                }
+            }
+            soFar[key] = Pair(current.steps, current.ore)
+
+            if (current.x == end) {
+                if (current.ore == oreTarget) {
+                    minSteps = min(minSteps, current.steps)
+                    frontier.removeAll { it.steps > minSteps }
+                }
+                continue
+            }
+
+            if (current.ore < oreTarget) {
+                for (edge in edges[current.x]!!.filter { it.ore > 0 && it.canEnter(current.facing) }) {
+                    frontier.add(State23(edge.end, edge.endFacing, current.steps + edge.steps, current.ore + edge.ore))
+                }
+            }
+            for (edge in edges[current.x]!!.filter { it.ore == 0 && it.canEnter(current.facing) }) {
+                frontier.add(State23(edge.end, edge.endFacing, current.steps + edge.steps, current.ore))
+            }
+            frontier.sortBy { it.steps }
+        }
+        return minSteps
     }
 
     // Part 2
-    fun getMinStepsAtLeastOre(oreTarget: Int): Int {
-        var minSteps = Int.MAX_VALUE
-        val soFar = mutableMapOf<Pair<Int, Direction>, Pair<Int, Int>>()
-        val frontier = ArrayDeque<State2>()
-        frontier.add(State2(start, Direction.EAST, 0, 0))
+    fun getMinStepsAtLeastOre(oreTarget: Int): Long {
+        var minSteps = Long.MAX_VALUE
+        val soFar = mutableMapOf<Pair<Int, Direction>, Pair<Long, Long>>()
+        val frontier = ArrayDeque<State23>()
+        frontier.add(State23(start, Direction.EAST, 0, 0))
         while (frontier.isNotEmpty()) {
             val current = frontier.removeFirst()
             val key = Pair(current.x, current.facing)
@@ -108,12 +157,12 @@ class Graph(val start: Int, val end: Int, rawEdges: Set<Edge>) {
             }
 
             if (current.ore < oreTarget) {
-                for (edge in edgesHighValue[current.x]!!.filter { it.ore > 0 && it.canEnter(current.facing) }) {
-                    frontier.add(State2(edge.end, edge.endFacing, current.steps + edge.steps, current.ore + edge.ore))
+                for (edge in edges[current.x]!!.filter { it.ore > 0 && it.canEnter(current.facing) }) {
+                    frontier.add(State23(edge.end, edge.endFacing, current.steps + edge.steps, current.ore + edge.ore))
                 }
             }
-            for (edge in edgesHighValue[current.x]!!.filter { it.ore == 0 && it.canEnter(current.facing) }) {
-                frontier.add(State2(edge.end, edge.endFacing, current.steps + edge.steps, current.ore))
+            for (edge in edges[current.x]!!.filter { it.ore == 0 && it.canEnter(current.facing) }) {
+                frontier.add(State23(edge.end, edge.endFacing, current.steps + edge.steps, current.ore))
             }
             frontier.sortBy { it.steps }
         }
@@ -274,19 +323,43 @@ class Graph(val start: Int, val end: Int, rawEdges: Set<Edge>) {
     }
 }
 
-data class Edge(val start: Int, val startFacing: Direction, val end: Int, val steps: Int, val ore: Int) {
+data class Edge(
+    val start: Int,
+    val startFacing: Direction,
+    val end: Int,
+    val steps: Int,
+    val ore: Int,
+    val isHalfLoop: Boolean = false,
+    val isReverse: Boolean = false
+) {
     val value = (ore * 100.0 / steps).roundToInt() / 100.0
     val endFacing = when (startFacing) {
         Direction.NORTH -> {
             if (start == end) {
-                Direction.NORTH
+                if (isHalfLoop) {
+                    if (isReverse) {
+                        Direction.EAST
+                    } else {
+                        Direction.WEST
+                    }
+                } else {
+                    Direction.NORTH
+                }
             } else {
                 Direction.SOUTH
             }
         }
         Direction.SOUTH -> {
             if (start == end) {
-                Direction.SOUTH
+                if (isHalfLoop) {
+                    if (isReverse) {
+                        Direction.EAST
+                    } else {
+                        Direction.WEST
+                    }
+                } else {
+                    Direction.SOUTH
+                }
             } else {
                 Direction.NORTH
             }
@@ -327,6 +400,6 @@ data class State1(val x: Int, val facing: Direction, val steps: Int, val ore: Mu
     override fun toString() = "$x,$facing steps=$steps ore=$ore"
 }
 
-data class State2(val x: Int, val facing: Direction, val steps: Int, val ore: Int) {
+data class State23(val x: Int, val facing: Direction, val steps: Long, val ore: Long) {
     override fun toString() = "$x,$facing steps=$steps ore=$ore"
 }
