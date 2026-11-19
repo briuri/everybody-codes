@@ -3,7 +3,6 @@ package buri.ec.e2026.q18
 import buri.ec.common.BasePuzzle
 import buri.ec.common.Part
 import buri.ec.common.extractInts
-import buri.ec.common.position.Point2D
 import org.junit.Test
 
 /**
