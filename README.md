@@ -18,3 +18,4 @@ I may get around to optimizing these slow algorithms some day:
 - y24 q12 p3 (8:32)
 - y24 q19 p3 (23:35)
 - y24 q20 p2 (7:17)
+- y26 q18 p3 (16:01)
